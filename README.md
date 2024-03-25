@@ -1,4 +1,4 @@
-# Odos Limit Order Service
+# Odos Limit Order Smart Contract
 
 ### Limit order execution flow
 

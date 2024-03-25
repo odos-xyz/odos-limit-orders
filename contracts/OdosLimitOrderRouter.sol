@@ -207,6 +207,10 @@ contract OdosLimitOrderRouter is EIP712, Ownable, SignatureValidator {
       "uint32 referralCode,"
       "bool partiallyFillable"
     ")"
+    "TokenInfo("
+      "address tokenAddress,"
+      "uint256 tokenAmount"
+    ")"
   );
 
   bytes32 public constant MULTI_LIMIT_ORDER_TYPEHASH = keccak256(
@@ -217,6 +221,10 @@ contract OdosLimitOrderRouter is EIP712, Ownable, SignatureValidator {
       "uint256 salt,"
       "uint32 referralCode,"
       "bool partiallyFillable"
+    ")"
+    "TokenInfo("
+      "address tokenAddress,"
+      "uint256 tokenAmount"
     ")"
   );
 
@@ -291,7 +299,7 @@ contract OdosLimitOrderRouter is EIP712, Ownable, SignatureValidator {
   /// @param initialOwner The initial owner of the contract
   /// @param _odosRouterV2 OdosRouterV2 address
   constructor(address initialOwner, address _odosRouterV2)
-  EIP712("OdosLimitOrders", "1")
+  EIP712("OdosLimitOrderRouter", "1")
   Ownable(initialOwner) {
     ODOS_ROUTER_V2 = _odosRouterV2;
   }
