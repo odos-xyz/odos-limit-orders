@@ -667,8 +667,8 @@ contract OdosLimitOrderRouter is EIP712, Ownable, SignatureValidator {
     return
       abi.encode(
       MULTI_LIMIT_ORDER_TYPEHASH,
-      keccak256(abi.encode(encodedInputs)),
-      keccak256(abi.encode(encodedOutputs)),
+      keccak256(abi.encodePacked(encodedInputs)),
+      keccak256(abi.encodePacked(encodedOutputs)),
       order.expiry,
       order.salt,
       order.referralCode,
