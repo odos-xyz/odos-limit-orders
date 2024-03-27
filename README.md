@@ -38,6 +38,14 @@ forge build
 forge test
 ```
 
+Test the EIP-712 hash generation to ensure that the Solidity hash is generated correctly.
+
+```shell
+cd test/eip712test
+chmod +x ./runTest.sh
+./runTest.sh
+```
+
 ### Gas report
 
 ```shell
