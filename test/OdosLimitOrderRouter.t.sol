@@ -18,6 +18,8 @@ contract OdosLimitOrderRouterTest is OdosLimitOrderHelperTest {
 
   event AllowedFillerAdded(address indexed _address);
   event AllowedFillerRemoved(address indexed _address);
+  event LiquidatorAddressChanged(address indexed account);
+
   event SwapRouterFunds(
     address sender,
     address[] inputTokens,
@@ -262,8 +264,8 @@ contract OdosLimitOrderRouterTest is OdosLimitOrderHelperTest {
     ROUTER.transferRouterFunds(tokens, amounts, dest);
   }
 
-  /// @dev Reverts if not owner
-  function test_transferRouterFunds_revertsIfNotOwner() public {
+  /// @dev Reverts if not liquidator
+  function test_transferRouterFunds_revertsIfNotLiquidator() public {
     address[] memory tokens = new address[](1);
     uint256[] memory amounts = new uint256[](1);
     tokens[0] = DAI;
@@ -274,9 +276,37 @@ contract OdosLimitOrderRouterTest is OdosLimitOrderHelperTest {
     // mint tokens to router
     MockERC20(tokens[0]).faucet(address(ROUTER), amounts[0]);
 
-    vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, SIGNER_ADDRESS));
+    vm.expectRevert(abi.encodeWithSelector(AddressNotAllowed.selector, SIGNER_ADDRESS));
     vm.prank(SIGNER_ADDRESS);
     ROUTER.transferRouterFunds(tokens, amounts, dest);
   }
+
+  function test_transferRouterFunds_successIfLiquidator() public {
+    address[] memory tokens = new address[](1);
+    uint256[] memory amounts = new uint256[](1);
+    tokens[0] = DAI;
+    amounts[0] = 2000 * 1e18;
+
+    address dest = address(this);
+
+    // mint tokens to router
+    MockERC20(tokens[0]).faucet(address(ROUTER), amounts[0]);
+
+    // check that event is emitted, check all topics
+    vm.expectEmit(true, true, true, true);
+    emit LiquidatorAddressChanged(SIGNER_ADDRESS);
+
+    ROUTER.changeLiquidatorAddress(SIGNER_ADDRESS);
+
+    vm.prank(SIGNER_ADDRESS);
+    ROUTER.transferRouterFunds(tokens, amounts, dest);
+  }
+
+  function test_changeLiquidatorAddress_reverts() public {
+    vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, SIGNER_ADDRESS));
+    vm.prank(SIGNER_ADDRESS);
+    ROUTER.changeLiquidatorAddress(SIGNER_ADDRESS);
+  }
+
 
 }
