@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.21;
+pragma solidity 0.8.19;
 
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
@@ -14,7 +14,7 @@ import {SignatureValidator} from "./SignatureValidator.sol";
 
 using SafeERC20 for IERC20;
 
-error FillerNotAllowed(address fillerAddress);
+error AddressNotAllowed(address account);
 error OrderExpired(uint256 orderExpiry, uint256 currentTimestamp);
 error CurrentAmountMismatch(address tokenAddress, uint256 orderAmount, uint256 filledAmount, uint256 currentAmount);
 error SlippageLimitExceeded(address tokenAddress, uint256 expectedAmount, uint256 actualAmount);
@@ -23,10 +23,11 @@ error TransferFailed(address destination, uint256 amount);
 error OrderCancelled(bytes32 orderHash);
 error InvalidArguments();
 error MinSurplusCheckFailed(address tokenAddress, uint256 expectedValue, uint256 actualValue);
+error InvalidAddress(address _address);
 
 
 /// @title Routing contract for Odos Limit Orders with single and multi input and output tokens
-contract OdosLimitOrderRouter is EIP712, Ownable, SignatureValidator {
+contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
 
   /// @dev SCALE is required for fractional proportion calculation
   uint256 private constant SCALE = 1e18;
@@ -40,6 +41,9 @@ contract OdosLimitOrderRouter is EIP712, Ownable, SignatureValidator {
 
   /// @dev OdosRouterV2 address
   address immutable private ODOS_ROUTER_V2;
+
+  /// @dev Address which allowed to swap and transfer internal funds
+  address private liquidatorAddress;
 
   /// @dev Event emitted on successful single input limit order execution
   event LimitOrderFilled(
@@ -86,6 +90,9 @@ contract OdosLimitOrderRouter is EIP712, Ownable, SignatureValidator {
 
   /// @dev Event emitted on removing allowed order filler
   event AllowedFillerRemoved(address indexed account);
+
+  /// @dev Event emitted on changing the liquidator address
+  event LiquidatorAddressChanged(address indexed account);
 
   /// @dev Event emitted on swapping internal router funds
   event SwapRouterFunds(
@@ -296,12 +303,15 @@ contract OdosLimitOrderRouter is EIP712, Ownable, SignatureValidator {
     ")"
     "TokenPermissions(address token,uint256 amount)";
 
-  /// @param initialOwner The initial owner of the contract
   /// @param _odosRouterV2 OdosRouterV2 address
-  constructor(address initialOwner, address _odosRouterV2)
+  constructor(address _odosRouterV2)
   EIP712("OdosLimitOrderRouter", "1")
-  Ownable(initialOwner) {
+  {
+    if (_odosRouterV2 == address(0)) {
+      revert InvalidAddress(_odosRouterV2);
+    }
     ODOS_ROUTER_V2 = _odosRouterV2;
+    changeLiquidatorAddress(msg.sender);
   }
 
 
@@ -522,9 +532,11 @@ contract OdosLimitOrderRouter is EIP712, Ownable, SignatureValidator {
     address odosExecutor
   )
   external
-  onlyOwner
   returns (uint256 amountOut)
   {
+    if (msg.sender != liquidatorAddress) {
+      revert AddressNotAllowed(msg.sender);
+    }
     uint256[] memory amountsIn = new uint256[](inputs.length);
     address[] memory tokensIn = new address[](inputs.length);
 
@@ -535,8 +547,6 @@ contract OdosLimitOrderRouter is EIP712, Ownable, SignatureValidator {
       amountsIn[i] = inputs[i].tokenAmount == 0 ?
         IERC20(tokensIn[i]).balanceOf(address(this)) : inputs[i].tokenAmount;
 
-      // Approve spending
-      IERC20(tokensIn[i]).approve(inputReceivers[i], amountsIn[i]);
       // Transfer funds to the receivers
       IERC20(tokensIn[i]).safeTransfer(inputReceivers[i], amountsIn[i]);
     }
@@ -580,6 +590,9 @@ contract OdosLimitOrderRouter is EIP712, Ownable, SignatureValidator {
   external
   onlyOwner
   {
+    if (dest == address(0)) {
+      revert InvalidAddress(dest);
+    }
     if (tokens.length != amounts.length) revert InvalidArguments();
     for (uint256 i = 0; i < tokens.length; i++) {
       if (tokens[i] == _ETH) {
@@ -608,6 +621,16 @@ contract OdosLimitOrderRouter is EIP712, Ownable, SignatureValidator {
   function removeAllowedFiller(address account) external onlyOwner {
     allowedFillers[account] = false;
     emit AllowedFillerRemoved(account);
+  }
+
+  /// @notice Changes the address which can call `swapRouterFunds()` function
+  /// @param account The address of new liquidator
+  function changeLiquidatorAddress(address account)
+  public
+  onlyOwner
+  {
+    liquidatorAddress = account;
+    emit LiquidatorAddressChanged(account);
   }
 
   /// @dev Encodes TokenInfo struct according to EIP-712
@@ -710,7 +733,7 @@ contract OdosLimitOrderRouter is EIP712, Ownable, SignatureValidator {
   {
     // 1. Check msg.sender allowed
     if (!allowedFillers[msg.sender]) {
-      revert FillerNotAllowed(msg.sender);
+      revert AddressNotAllowed(msg.sender);
     }
 
     // 2. Check if order still valid
@@ -849,7 +872,7 @@ contract OdosLimitOrderRouter is EIP712, Ownable, SignatureValidator {
   {
     // 1. Check msg.sender allowed
     if (!allowedFillers[msg.sender]) {
-      revert FillerNotAllowed(msg.sender);
+      revert AddressNotAllowed(msg.sender);
     }
 
     // 2. Check if order still valid

@@ -2,8 +2,8 @@
 src = "contracts"
 out = "out"
 libs = ["lib"]
-solc-version = "0.8.24"
+solc-version = "0.8.19"
 optimizer = true
-optimizer-runs = 200
+optimizer-runs = 1000
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

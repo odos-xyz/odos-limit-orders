@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.21;
+pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "../interfaces/IOdosExecutor.sol";
 import {MockOdosExecutor} from "./MockOdosExecutor.sol";
 import {MockERC20} from "./MockERC20.sol";
-import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
+import {IERC20Errors} from "../interfaces/draft-IERC6093.sol";
 
 import "./OdosLimitOrderHelper.t.sol";
 import "../contracts/OdosLimitOrderRouter.sol";
@@ -18,6 +18,7 @@ contract OdosLimitOrderRouterTest is OdosLimitOrderHelperTest {
 
   event AllowedFillerAdded(address indexed _address);
   event AllowedFillerRemoved(address indexed _address);
+  event LiquidatorAddressChanged(address indexed account);
   event SwapRouterFunds(
     address sender,
     address[] inputTokens,
@@ -69,7 +70,7 @@ contract OdosLimitOrderRouterTest is OdosLimitOrderHelperTest {
 
   function testAddAllowedFille_reverts() public {
     // replace the sender address
-    vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, 0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf));
+    vm.expectRevert("Ownable: caller is not the owner");
     vm.prank(SIGNER_ADDRESS);
     ROUTER.addAllowedFiller(address(this));
   }
@@ -274,8 +275,37 @@ contract OdosLimitOrderRouterTest is OdosLimitOrderHelperTest {
     // mint tokens to router
     MockERC20(tokens[0]).faucet(address(ROUTER), amounts[0]);
 
-    vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, SIGNER_ADDRESS));
+    vm.expectRevert("Ownable: caller is not the owner");
     vm.prank(SIGNER_ADDRESS);
+    ROUTER.transferRouterFunds(tokens, amounts, dest);
+  }
+
+  function test_changeLiquidatorAddress_succeeds() public {
+    vm.expectEmit(true, true, true, true);
+    emit LiquidatorAddressChanged(SIGNER_ADDRESS);
+
+    ROUTER.changeLiquidatorAddress(SIGNER_ADDRESS);
+  }
+
+  function test_changeLiquidatorAddress_reverts() public {
+    vm.expectRevert("Ownable: caller is not the owner");
+    vm.prank(SIGNER_ADDRESS);
+    ROUTER.changeLiquidatorAddress(SIGNER_ADDRESS);
+  }
+
+  function test_zero_address_reverts() public {
+    // test invalid constructor address
+    vm.expectRevert(abi.encodeWithSelector(InvalidAddress.selector, address(0)));
+    new OdosLimitOrderRouter(address(0));
+
+    address[] memory tokens = new address[](1);
+    uint256[] memory amounts = new uint256[](1);
+    tokens[0] = DAI;
+    amounts[0] = 2000 * 1e18;
+    address dest = address(0);
+
+    // test invalid transferRouterFunds address
+    vm.expectRevert(abi.encodeWithSelector(InvalidAddress.selector, address(0)));
     ROUTER.transferRouterFunds(tokens, amounts, dest);
   }
 

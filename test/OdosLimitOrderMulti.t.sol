@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.21;
+pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
 import "../contracts/OdosLimitOrderRouter.sol";
@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../interfaces/IOdosExecutor.sol";
 import {MockOdosExecutor} from "./MockOdosExecutor.sol";
 import {MockERC20} from "./MockERC20.sol";
-import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
+import {IERC20Errors} from "../interfaces/draft-IERC6093.sol";
 import "./MockSmartContractWallet.sol";
 import "./OdosLimitOrderHelper.t.sol";
 
@@ -157,7 +157,7 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
       balancesBefore[i] = IERC20(USDC).balanceOf(SIGNER_ADDRESS);
     }
 
-    vm.expectRevert(abi.encodeWithSelector(FillerNotAllowed.selector, address(this)));
+    vm.expectRevert(abi.encodeWithSelector(AddressNotAllowed.selector, address(this)));
     ROUTER.fillMultiLimitOrder(order, signature, context);
   }
 
@@ -368,7 +368,7 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
     ROUTER.addAllowedFiller(address(this));
 
     // run test, revert expected
-    vm.expectRevert(abi.encodeWithSelector(ERC20InsufficientAllowance.selector, ROUTER, 0, 1999000000000000000000));
+    vm.expectRevert("ERC20: insufficient allowance");
     ROUTER.fillMultiLimitOrder(order, signature, context);
   }
 

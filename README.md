@@ -74,5 +74,7 @@ Then open the `report/index.html` in the browser.
 Install [Mythril](https://github.com/Consensys/mythril)
 
 ```shell
+solc-select install 0.8.19
+export SOLC_VERSION=0.8.19
 myth analyze contracts/OdosLimitOrderRouter.sol --solc-json ./mythril.config.json
 ```

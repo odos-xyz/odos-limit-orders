@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.19;
 
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {UniversalSigValidator} from "./UniversalSigValidator.sol";
@@ -10,9 +10,6 @@ error InvalidPresignLength(uint256 expectedLength, uint256 actualLength);
 
 /// @notice Limit order signature validator
 contract SignatureValidator is UniversalSigValidator {
-
-  // bytes4(keccak256("isValidSignature(bytes32,bytes)")
-  bytes4 constant internal EIP1271_MAGICVALUE = 0x1626ba7e;
 
   /// @dev Storage for keeping pre-signed orders
   mapping(address account => mapping(bytes32 orderHash => bool preSigned)) public preSignedOrders;

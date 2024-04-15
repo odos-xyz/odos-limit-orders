@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.21;
+pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
+import {IERC20Errors} from "../interfaces/draft-IERC6093.sol";
 import "../interfaces/IOdosExecutor.sol";
 import "../interfaces/ISignatureTransfer.sol";
 import {MockOdosExecutor} from "./MockOdosExecutor.sol";
@@ -25,10 +25,10 @@ contract OdosLimitOrderHelperTest is Test, EIP712("OdosLimitOrders", "1"), IERC2
   /// @notice Thrown when the recovered signer does not equal the claimedSigner
   error InvalidSigner();
 
-  MockOdosExecutor immutable ODOS_EXECUTOR = new MockOdosExecutor();
-  ISignatureTransfer immutable PERMIT2 = new MockPermit2();
-  IOdosRouterV2 immutable odosRouterV2 = new MockOdosRouterV2();
-  OdosLimitOrderRouter immutable ROUTER = new OdosLimitOrderRouter(address(this), address(odosRouterV2));
+  MockOdosExecutor immutable ODOS_EXECUTOR;
+  ISignatureTransfer immutable PERMIT2;
+  IOdosRouterV2 immutable ODOS_ROUTER_V2;
+  OdosLimitOrderRouter immutable ROUTER;
 
   address constant _ETH = address(0);
   uint256 constant FEE_DENOM = 1e18;
@@ -52,9 +52,17 @@ contract OdosLimitOrderHelperTest is Test, EIP712("OdosLimitOrders", "1"), IERC2
 
   bytes32 public constant TOKEN_PERMISSIONS_TYPEHASH = keccak256("TokenPermissions(address token,uint256 amount)");
 
+  constructor() {
+    ODOS_EXECUTOR = new MockOdosExecutor();
+    PERMIT2 = new MockPermit2();
+    ODOS_ROUTER_V2 = new MockOdosRouterV2();
+    ROUTER = new OdosLimitOrderRouter(address(ODOS_ROUTER_V2));
+  }
+
+
   function setUp() virtual public {
-    odosRouterV2.registerReferralCode(REFERRAL_CODE_FEE, REFERRAL_FEE, REFERRAL_BENEFICIARY_ADDRESS_FEE);
-    odosRouterV2.registerReferralCode(REFERRAL_CODE_TRACK, 0, REFERRAL_BENEFICIARY_ADDRESS_TRACK);
+    ODOS_ROUTER_V2.registerReferralCode(REFERRAL_CODE_FEE, REFERRAL_FEE, REFERRAL_BENEFICIARY_ADDRESS_FEE);
+    ODOS_ROUTER_V2.registerReferralCode(REFERRAL_CODE_TRACK, 0, REFERRAL_BENEFICIARY_ADDRESS_TRACK);
   }
 
   /// Creates a limit order with default parameters which can be overridden if necessary before signing the order

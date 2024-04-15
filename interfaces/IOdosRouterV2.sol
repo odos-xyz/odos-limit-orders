@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.19;
 
 
 /// @notice Interface for https://github.com/odos-xyz/odos-router-v2/blob/main/contracts/OdosRouterV2.sol functions used in the limit order contract

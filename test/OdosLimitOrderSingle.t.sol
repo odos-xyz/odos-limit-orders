@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.21;
+pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
+import {IERC20Errors} from "../interfaces/draft-IERC6093.sol";
 
 import "../contracts/OdosLimitOrderRouter.sol";
 import "../interfaces/IOdosExecutor.sol";
@@ -113,7 +113,7 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
     //ROUTER.addToWhitelist(address(this));
 
     // run test, revert expected
-    vm.expectRevert(abi.encodeWithSelector(FillerNotAllowed.selector, address(this)));
+    vm.expectRevert(abi.encodeWithSelector(AddressNotAllowed.selector, address(this)));
     ROUTER.fillLimitOrder(order, signature, context);
   }
 
@@ -315,7 +315,7 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
     ROUTER.addAllowedFiller(address(this));
 
     // run test, revert expected
-    vm.expectRevert(abi.encodeWithSelector(ERC20InsufficientAllowance.selector, ROUTER, 0, 2001000000000000000000));
+    vm.expectRevert("ERC20: insufficient allowance");
     ROUTER.fillLimitOrder(order, signature, context);
   }
 
