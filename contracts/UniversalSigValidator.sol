@@ -16,6 +16,8 @@ interface IERC1271Wallet {
 
 error ERC1271Revert(bytes error);
 error ERC6492DeployFailed(bytes error);
+error InvalidSignatureLength();
+error InvalidSignatureVValue();
 
 contract UniversalSigValidator {
   bytes32 private constant ERC6492_DETECTION_SUFFIX = 0x6492649264926492649264926492649264926492649264926492649264926492;
@@ -68,14 +70,14 @@ contract UniversalSigValidator {
     }
 
     // ecrecover verification
-    // solhint-disable-next-line reason-string, gas-custom-errors
-    require(_signature.length == 65, "SignatureValidator#recoverSigner: invalid signature length");
+    if (_signature.length != 65) {
+      revert InvalidSignatureLength();
+    }
     bytes32 r = bytes32(_signature[0:32]);
     bytes32 s = bytes32(_signature[32:64]);
     uint8 v = uint8(_signature[64]);
     if (v != 27 && v != 28) {
-      // solhint-disable-next-line reason-string, gas-custom-errors
-      revert("SignatureValidator: invalid signature v value");
+      revert InvalidSignatureVValue();
     }
     return ECDSA.recover(_hash, v, r, s) == _signer;
   }
