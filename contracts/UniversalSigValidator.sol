@@ -31,7 +31,8 @@ contract UniversalSigValidator {
     // - ERC-6492 suffix check and verification first, while being permissive in case the contract is already deployed; if the contract is deployed we will check the sig against the deployed version, this allows 6492 signatures to still be validated while taking into account potential key rotation
     // - ERC-1271 verification if there's contract code
     // - finally, ecrecover
-    bool isCounterfactual = bytes32(_signature[_signature.length-32:_signature.length]) == ERC6492_DETECTION_SUFFIX;
+    bool isCounterfactual = _signature.length >= 32
+      && bytes32(_signature[_signature.length-32:_signature.length]) == ERC6492_DETECTION_SUFFIX;
     if (isCounterfactual) {
       address create2Factory;
       bytes memory factoryCalldata;
@@ -92,7 +93,7 @@ contract UniversalSigValidator {
       uint256 len = error.length;
       if (len == 1) return error[0] == 0x01;
       // all other errors are simply forwarded, but in custom formats so that nothing else can revert with a single byte in the call
-      else assembly { revert(error, len) }
+      else assembly { revert(add(error, 0x20), len) }
     }
   }
 }
