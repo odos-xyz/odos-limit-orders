@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.19;
 
 import {OdosLimitOrderRouter} from "../contracts/OdosLimitOrderRouter.sol";
 
@@ -7,8 +7,8 @@ import {OdosLimitOrderRouter} from "../contracts/OdosLimitOrderRouter.sol";
 /// @dev This contract is required for exposing the internal function getOrderOwnerOrRevert for tests
 contract OdosLimitOrderRouterHarness is OdosLimitOrderRouter {
 
-  constructor(address initialOwner, address _odosRouterV2)
-  OdosLimitOrderRouter(initialOwner, _odosRouterV2) {}
+  constructor(address _odosRouterV2)
+  OdosLimitOrderRouter(_odosRouterV2) {}
 
   function exposed_getOrderOwnerOrRevert(
     bytes32 orderHash,

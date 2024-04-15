@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
@@ -30,7 +30,7 @@ contract SignatureValidationsTest is OdosLimitOrderHelperTest {
   function setUp() override public {
     OdosLimitOrderHelperTest.setUp();
 
-    ROUTER2 = new OdosLimitOrderRouterHarness(address(this), vm.addr(1));
+    ROUTER2 = new OdosLimitOrderRouterHarness(vm.addr(1));
 
     // construct order with default test parameters
     defaultOrder = createDefaultLimitOrder();

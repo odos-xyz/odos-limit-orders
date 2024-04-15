@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.19;
 
 contract Create2Factory {
     function deploy(bytes32 salt, bytes memory bytecode) public returns (address) {

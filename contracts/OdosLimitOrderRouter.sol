@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.21;
+pragma solidity 0.8.19;
 
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -304,16 +303,15 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
     ")"
     "TokenPermissions(address token,uint256 amount)";
 
-  /// @param initialOwner The initial owner of the contract
   /// @param _odosRouterV2 OdosRouterV2 address
-  constructor(address initialOwner, address _odosRouterV2)
+  constructor(address _odosRouterV2)
   EIP712("OdosLimitOrderRouter", "1")
-  Ownable(initialOwner) {
+  {
     if (_odosRouterV2 == address(0)) {
       revert InvalidAddress(_odosRouterV2);
     }
     ODOS_ROUTER_V2 = _odosRouterV2;
-    changeLiquidatorAddress(initialOwner);
+    changeLiquidatorAddress(msg.sender);
   }
 
 
