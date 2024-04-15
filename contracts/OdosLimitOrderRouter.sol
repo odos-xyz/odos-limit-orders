@@ -545,8 +545,6 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
       amountsIn[i] = inputs[i].tokenAmount == 0 ?
         IERC20(tokensIn[i]).balanceOf(address(this)) : inputs[i].tokenAmount;
 
-      // Approve spending
-      IERC20(tokensIn[i]).approve(inputReceivers[i], amountsIn[i]);
       // Transfer funds to the receivers
       IERC20(tokensIn[i]).safeTransfer(inputReceivers[i], amountsIn[i]);
     }
