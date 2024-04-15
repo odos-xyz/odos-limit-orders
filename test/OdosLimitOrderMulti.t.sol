@@ -157,7 +157,7 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
       balancesBefore[i] = IERC20(USDC).balanceOf(SIGNER_ADDRESS);
     }
 
-    vm.expectRevert(abi.encodeWithSelector(FillerNotAllowed.selector, address(this)));
+    vm.expectRevert(abi.encodeWithSelector(AddressNotAllowed.selector, address(this)));
     ROUTER.fillMultiLimitOrder(order, signature, context);
   }
 

@@ -113,7 +113,7 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
     //ROUTER.addToWhitelist(address(this));
 
     // run test, revert expected
-    vm.expectRevert(abi.encodeWithSelector(FillerNotAllowed.selector, address(this)));
+    vm.expectRevert(abi.encodeWithSelector(AddressNotAllowed.selector, address(this)));
     ROUTER.fillLimitOrder(order, signature, context);
   }
 

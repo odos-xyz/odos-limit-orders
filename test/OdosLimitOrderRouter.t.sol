@@ -18,6 +18,7 @@ contract OdosLimitOrderRouterTest is OdosLimitOrderHelperTest {
 
   event AllowedFillerAdded(address indexed _address);
   event AllowedFillerRemoved(address indexed _address);
+  event LiquidatorAddressChanged(address indexed account);
   event SwapRouterFunds(
     address sender,
     address[] inputTokens,
@@ -277,6 +278,19 @@ contract OdosLimitOrderRouterTest is OdosLimitOrderHelperTest {
     vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, SIGNER_ADDRESS));
     vm.prank(SIGNER_ADDRESS);
     ROUTER.transferRouterFunds(tokens, amounts, dest);
+  }
+
+  function test_changeLiquidatorAddress_succeeds() public {
+    vm.expectEmit(true, true, true, true);
+    emit LiquidatorAddressChanged(SIGNER_ADDRESS);
+
+    ROUTER.changeLiquidatorAddress(SIGNER_ADDRESS);
+  }
+
+  function test_changeLiquidatorAddress_reverts() public {
+    vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, SIGNER_ADDRESS));
+    vm.prank(SIGNER_ADDRESS);
+    ROUTER.changeLiquidatorAddress(SIGNER_ADDRESS);
   }
 
 }

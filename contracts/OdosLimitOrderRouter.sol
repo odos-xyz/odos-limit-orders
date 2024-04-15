@@ -14,7 +14,7 @@ import {SignatureValidator} from "./SignatureValidator.sol";
 
 using SafeERC20 for IERC20;
 
-error FillerNotAllowed(address fillerAddress);
+error AddressNotAllowed(address account);
 error OrderExpired(uint256 orderExpiry, uint256 currentTimestamp);
 error CurrentAmountMismatch(address tokenAddress, uint256 orderAmount, uint256 filledAmount, uint256 currentAmount);
 error SlippageLimitExceeded(address tokenAddress, uint256 expectedAmount, uint256 actualAmount);
@@ -40,6 +40,9 @@ contract OdosLimitOrderRouter is EIP712, Ownable, SignatureValidator {
 
   /// @dev OdosRouterV2 address
   address immutable private ODOS_ROUTER_V2;
+
+  /// @dev Address which allowed to swap and transfer internal funds
+  address private liquidatorAddress;
 
   /// @dev Event emitted on successful single input limit order execution
   event LimitOrderFilled(
@@ -86,6 +89,9 @@ contract OdosLimitOrderRouter is EIP712, Ownable, SignatureValidator {
 
   /// @dev Event emitted on removing allowed order filler
   event AllowedFillerRemoved(address indexed account);
+
+  /// @dev Event emitted on changing the liquidator address
+  event LiquidatorAddressChanged(address indexed account);
 
   /// @dev Event emitted on swapping internal router funds
   event SwapRouterFunds(
@@ -302,6 +308,7 @@ contract OdosLimitOrderRouter is EIP712, Ownable, SignatureValidator {
   EIP712("OdosLimitOrderRouter", "1")
   Ownable(initialOwner) {
     ODOS_ROUTER_V2 = _odosRouterV2;
+    changeLiquidatorAddress(initialOwner);
   }
 
 
@@ -522,9 +529,11 @@ contract OdosLimitOrderRouter is EIP712, Ownable, SignatureValidator {
     address odosExecutor
   )
   external
-  onlyOwner
   returns (uint256 amountOut)
   {
+    if (msg.sender != liquidatorAddress) {
+      revert AddressNotAllowed(msg.sender);
+    }
     uint256[] memory amountsIn = new uint256[](inputs.length);
     address[] memory tokensIn = new address[](inputs.length);
 
@@ -608,6 +617,16 @@ contract OdosLimitOrderRouter is EIP712, Ownable, SignatureValidator {
   function removeAllowedFiller(address account) external onlyOwner {
     allowedFillers[account] = false;
     emit AllowedFillerRemoved(account);
+  }
+
+  /// @notice Changes the address which can call `swapRouterFunds()` function
+  /// @param account The address of new liquidator
+  function changeLiquidatorAddress(address account)
+  public
+  onlyOwner
+  {
+    liquidatorAddress = account;
+    emit LiquidatorAddressChanged(account);
   }
 
   /// @dev Encodes TokenInfo struct according to EIP-712
@@ -710,7 +729,7 @@ contract OdosLimitOrderRouter is EIP712, Ownable, SignatureValidator {
   {
     // 1. Check msg.sender allowed
     if (!allowedFillers[msg.sender]) {
-      revert FillerNotAllowed(msg.sender);
+      revert AddressNotAllowed(msg.sender);
     }
 
     // 2. Check if order still valid
@@ -849,7 +868,7 @@ contract OdosLimitOrderRouter is EIP712, Ownable, SignatureValidator {
   {
     // 1. Check msg.sender allowed
     if (!allowedFillers[msg.sender]) {
-      revert FillerNotAllowed(msg.sender);
+      revert AddressNotAllowed(msg.sender);
     }
 
     // 2. Check if order still valid
