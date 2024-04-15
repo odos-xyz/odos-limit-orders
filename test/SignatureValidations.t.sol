@@ -215,4 +215,21 @@ contract SignatureValidationsTest is OdosLimitOrderHelperTest {
     );
   }
 
+  // Check the situation when the user set SignatureValidationMethod.EIP1271,
+  // but instead of SCW there is EOA. In this case we use ECDSA.recover() to
+  // to get the signer address
+  function test_EIP1271_EIP712_succeeds() public {
+    address accountAddress = SIGNER_ADDRESS;
+    SignatureValidator.Signature memory signature = getOrderSignature(defaultOrder);
+
+    bytes memory encodedSignature = abi.encodePacked(accountAddress, signature.signature);
+
+    address orderOwner = ROUTER2.exposed_getOrderOwnerOrRevert(
+      ROUTER.getLimitOrderHash(defaultOrder),
+      encodedSignature,
+      SignatureValidator.SignatureValidationMethod.EIP1271
+    );
+
+    assertEq(accountAddress, orderOwner);
+  }
 }

@@ -2,6 +2,8 @@
 // solhint-disable-next-line one-contract-per-file
 pragma solidity ^0.8.19;
 
+import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+
 // Copy-paste from https://github.com/AmbireTech/signature-validator/blob/main/contracts/EIP6492.sol
 // with minimal modifications
 
@@ -75,7 +77,7 @@ contract UniversalSigValidator {
       // solhint-disable-next-line reason-string, gas-custom-errors
       revert("SignatureValidator: invalid signature v value");
     }
-    return ecrecover(_hash, v, r, s) == _signer;
+    return ECDSA.recover(_hash, v, r, s) == _signer;
   }
 
   function isValidSigWithSideEffects(address _signer, bytes32 _hash, bytes calldata _signature)
