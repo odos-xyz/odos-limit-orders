@@ -2,6 +2,7 @@
 pragma solidity ^0.8.21;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
@@ -26,7 +27,7 @@ error MinSurplusCheckFailed(address tokenAddress, uint256 expectedValue, uint256
 
 
 /// @title Routing contract for Odos Limit Orders with single and multi input and output tokens
-contract OdosLimitOrderRouter is EIP712, Ownable, SignatureValidator {
+contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
 
   /// @dev SCALE is required for fractional proportion calculation
   uint256 private constant SCALE = 1e18;
