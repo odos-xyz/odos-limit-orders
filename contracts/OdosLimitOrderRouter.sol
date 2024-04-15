@@ -24,6 +24,7 @@ error TransferFailed(address destination, uint256 amount);
 error OrderCancelled(bytes32 orderHash);
 error InvalidArguments();
 error MinSurplusCheckFailed(address tokenAddress, uint256 expectedValue, uint256 actualValue);
+error InvalidAddress(address _address);
 
 
 /// @title Routing contract for Odos Limit Orders with single and multi input and output tokens
@@ -308,6 +309,9 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
   constructor(address initialOwner, address _odosRouterV2)
   EIP712("OdosLimitOrderRouter", "1")
   Ownable(initialOwner) {
+    if (_odosRouterV2 == address(0)) {
+      revert InvalidAddress(_odosRouterV2);
+    }
     ODOS_ROUTER_V2 = _odosRouterV2;
     changeLiquidatorAddress(initialOwner);
   }
@@ -588,6 +592,9 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
   external
   onlyOwner
   {
+    if (dest == address(0)) {
+      revert InvalidAddress(dest);
+    }
     if (tokens.length != amounts.length) revert InvalidArguments();
     for (uint256 i = 0; i < tokens.length; i++) {
       if (tokens[i] == _ETH) {

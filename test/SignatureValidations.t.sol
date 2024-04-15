@@ -30,7 +30,7 @@ contract SignatureValidationsTest is OdosLimitOrderHelperTest {
   function setUp() override public {
     OdosLimitOrderHelperTest.setUp();
 
-    ROUTER2 = new OdosLimitOrderRouterHarness(address(this), address(0));
+    ROUTER2 = new OdosLimitOrderRouterHarness(address(this), vm.addr(1));
 
     // construct order with default test parameters
     defaultOrder = createDefaultLimitOrder();

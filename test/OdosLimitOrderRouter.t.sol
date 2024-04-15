@@ -293,4 +293,24 @@ contract OdosLimitOrderRouterTest is OdosLimitOrderHelperTest {
     ROUTER.changeLiquidatorAddress(SIGNER_ADDRESS);
   }
 
+  function test_zero_address_reverts() public {
+    // test invalid constructor address 1
+    vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableInvalidOwner.selector, address(0)));
+    new OdosLimitOrderRouter(address(0), vm.addr(1));
+
+    // test invalid constructor address 2
+    vm.expectRevert(abi.encodeWithSelector(InvalidAddress.selector, address(0)));
+    new OdosLimitOrderRouter(vm.addr(1), address(0));
+
+    address[] memory tokens = new address[](1);
+    uint256[] memory amounts = new uint256[](1);
+    tokens[0] = DAI;
+    amounts[0] = 2000 * 1e18;
+    address dest = address(0);
+
+    // test invalid transferRouterFunds address
+    vm.expectRevert(abi.encodeWithSelector(InvalidAddress.selector, address(0)));
+    ROUTER.transferRouterFunds(tokens, amounts, dest);
+  }
+
 }
