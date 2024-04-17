@@ -83,7 +83,7 @@ contract OdosLimitOrderRouterTest is OdosLimitOrderHelperTest {
     ROUTER.removeAllowedFiller(address(this));
   }
 
-  /// @dev Successfully swaps the router funds
+  /// @dev Successfully swaps the router funds if owner
   function testRouterSwap_succeeds() public {
     address inputToken1 = DAI;
     uint256 inputAmount1 = 2000 * 1e18;
@@ -154,6 +154,49 @@ contract OdosLimitOrderRouterTest is OdosLimitOrderHelperTest {
     assertTrue(usdcBalanceDiff == 4001 * 1e6);
   }
 
+  function testRouterSwap_succeedsIfLiquidator() public {
+    address inputToken1 = DAI;
+    uint256 inputAmount1 = 2001 * 1e18;
+    address outputToken = USDC;
+    uint256 amountOut = 4001 * 1e6;
+
+    OdosLimitOrderRouter.TokenInfo[] memory inputs = new OdosLimitOrderRouter.TokenInfo[](1);
+    inputs[0] = OdosLimitOrderRouter.TokenInfo(inputToken1, inputAmount1);
+
+    // mint tokens to router
+    MockERC20(inputToken1).faucet(address(ROUTER), inputAmount1);
+
+    address[] memory tokensOut = new address[](1);
+    tokensOut[0] = outputToken;
+
+    uint256[] memory amountsOut = new uint256[](1);
+    amountsOut[0] = amountOut;
+
+    bytes memory pathDefinition = abi.encode(tokensOut, amountsOut);
+
+    OdosLimitOrderRouter.TokenInfo memory output = OdosLimitOrderRouter.TokenInfo({
+      tokenAddress : outputToken,
+      tokenAmount : amountOut
+    });
+
+    address[] memory inputReceivers = new address[](2);
+    inputReceivers[0] = address(ROUTER);
+
+    ROUTER.changeLiquidatorAddress(vm.addr(2));
+
+    vm.prank(vm.addr(2));
+    ROUTER.swapRouterFunds(
+      inputs,
+      inputReceivers,
+      output,
+      address(this),
+      pathDefinition,
+      address(ODOS_EXECUTOR)
+    );
+    // assert we can reach here without reverts
+    assertTrue(true);
+  }
+
   /// @dev Reverts if the swap output amount is smaller than expected
   function testRouterSwap_reverts() public {
     address inputToken1 = DAI;
@@ -190,6 +233,49 @@ contract OdosLimitOrderRouterTest is OdosLimitOrderHelperTest {
     inputReceivers[1] = address(ROUTER);
 
     vm.expectRevert(abi.encodeWithSelector(SlippageLimitExceeded.selector, outputToken, amountOut, amountOut - 1));
+    ROUTER.swapRouterFunds(
+      inputs,
+      inputReceivers,
+      output,
+      address(this),
+      pathDefinition,
+      address(ODOS_EXECUTOR)
+    );
+  }
+
+  /// @dev Reverts if the msg.sender is neither Liquidator nor Owner
+  function testRouterSwap_revertsIfNotLiquidatorOrOwner() public {
+    address inputToken1 = DAI;
+    uint256 inputAmount1 = 2001 * 1e18;
+    address outputToken = USDC;
+    uint256 amountOut = 4001 * 1e6;
+
+    OdosLimitOrderRouter.TokenInfo[] memory inputs = new OdosLimitOrderRouter.TokenInfo[](1);
+    inputs[0] = OdosLimitOrderRouter.TokenInfo(inputToken1, inputAmount1);
+
+    // mint tokens to router
+    MockERC20(inputToken1).faucet(address(ROUTER), inputAmount1);
+
+    address[] memory tokensOut = new address[](1);
+    tokensOut[0] = outputToken;
+
+    uint256[] memory amountsOut = new uint256[](1);
+    amountsOut[0] = amountOut;
+
+    bytes memory pathDefinition = abi.encode(tokensOut, amountsOut);
+
+    OdosLimitOrderRouter.TokenInfo memory output = OdosLimitOrderRouter.TokenInfo({
+      tokenAddress : outputToken,
+      tokenAmount : amountOut
+    });
+
+    address[] memory inputReceivers = new address[](2);
+    inputReceivers[0] = address(ROUTER);
+
+    ROUTER.changeLiquidatorAddress(vm.addr(2));
+
+    vm.expectRevert(abi.encodeWithSelector(AddressNotAllowed.selector, SIGNER_ADDRESS));
+    vm.prank(SIGNER_ADDRESS);
     ROUTER.swapRouterFunds(
       inputs,
       inputReceivers,
@@ -307,6 +393,11 @@ contract OdosLimitOrderRouterTest is OdosLimitOrderHelperTest {
     // test invalid transferRouterFunds address
     vm.expectRevert(abi.encodeWithSelector(InvalidAddress.selector, address(0)));
     ROUTER.transferRouterFunds(tokens, amounts, dest);
+  }
+
+  function test_renounceOwnership_reverts() public {
+    vm.expectRevert(abi.encodeWithSelector(FunctionIsDisabled.selector));
+    ROUTER.renounceOwnership();
   }
 
 }
