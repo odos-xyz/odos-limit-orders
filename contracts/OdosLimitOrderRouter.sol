@@ -42,7 +42,7 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
   /// @dev OdosRouterV2 address
   address immutable private ODOS_ROUTER_V2;
 
-  /// @dev Address which allowed to swap and transfer internal funds
+  /// @dev Address which allowed to call `swapRouterFunds()` besides owner
   address private liquidatorAddress;
 
   /// @dev Event emitted on successful single input limit order execution
@@ -515,7 +515,7 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
     emit MultiLimitOrderCancelled(orderHash, msg.sender);
   }
 
-  /// @notice Directly swap funds held in router, multi input tokens to one output token
+  /// @notice Directly swap funds held in router, multi input tokens to one output token. Only owner or liquidatorAddress can call it.
   /// @param inputs List of input token structs
   /// @param inputReceivers List of addresses for swap execution
   /// @param output Output token structs
@@ -534,7 +534,7 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
   external
   returns (uint256 amountOut)
   {
-    if (msg.sender != liquidatorAddress) {
+    if (msg.sender != liquidatorAddress && msg.sender != owner()) {
       revert AddressNotAllowed(msg.sender);
     }
     uint256[] memory amountsIn = new uint256[](inputs.length);
