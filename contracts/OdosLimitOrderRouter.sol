@@ -24,6 +24,7 @@ error OrderCancelled(bytes32 orderHash);
 error InvalidArguments();
 error MinSurplusCheckFailed(address tokenAddress, uint256 expectedValue, uint256 actualValue);
 error InvalidAddress(address _address);
+error FunctionIsDisabled();
 
 
 /// @title Routing contract for Odos Limit Orders with single and multi input and output tokens
@@ -42,7 +43,7 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
   /// @dev OdosRouterV2 address
   address immutable private ODOS_ROUTER_V2;
 
-  /// @dev Address which allowed to call `swapRouterFunds()` besides owner
+  /// @dev Address which allowed to call `swapRouterFunds()` besides the owner
   address private liquidatorAddress;
 
   /// @dev Event emitted on successful single input limit order execution
@@ -621,6 +622,11 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
   function removeAllowedFiller(address account) external onlyOwner {
     allowedFillers[account] = false;
     emit AllowedFillerRemoved(account);
+  }
+
+  /// @notice Disable the Ownable.renounceOwnership() function to prevent ownerless state
+  function renounceOwnership() public onlyOwner view override {
+    revert FunctionIsDisabled();
   }
 
   /// @notice Changes the address which can call `swapRouterFunds()` function

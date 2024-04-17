@@ -395,4 +395,9 @@ contract OdosLimitOrderRouterTest is OdosLimitOrderHelperTest {
     ROUTER.transferRouterFunds(tokens, amounts, dest);
   }
 
+  function test_renounceOwnership_reverts() public {
+    vm.expectRevert(abi.encodeWithSelector(FunctionIsDisabled.selector));
+    ROUTER.renounceOwnership();
+  }
+
 }
