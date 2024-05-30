@@ -657,8 +657,8 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
     MockERC20(order.input.tokenAddress).faucet(SIGNER_ADDRESS, order.input.tokenAmount);
 
     // get permit2
-    bytes32 orderHash = ROUTER.getLimitOrderHash(order);
-    OdosLimitOrderRouter.Permit2Info memory swap_permit = createLimitOrderPermit2(order, context, orderHash, SIGNER_ADDRESS);
+    bytes32 orderStructHash = ROUTER.getLimitOrderStructHash(order);
+    OdosLimitOrderRouter.Permit2Info memory swap_permit = createLimitOrderPermit2(order, context, orderStructHash, SIGNER_ADDRESS);
 
     // approve Permit2 contract
     vm.prank(SIGNER_ADDRESS);
@@ -707,8 +707,8 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
     MockERC20(order.input.tokenAddress).faucet(wrongAddress, order.input.tokenAmount);
 
     // get permit2, wrong owner address
-    bytes32 orderHash = ROUTER.getLimitOrderHash(order);
-    OdosLimitOrderRouter.Permit2Info memory swap_permit = createLimitOrderPermit2(order, context, orderHash, wrongAddress);
+    bytes32 orderStructHash = ROUTER.getLimitOrderStructHash(order);
+    OdosLimitOrderRouter.Permit2Info memory swap_permit = createLimitOrderPermit2(order, context, orderStructHash, wrongAddress);
 
     // approve Permit2 contract
     vm.prank(wrongAddress);
@@ -738,13 +738,13 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
     MockERC20(order.input.tokenAddress).faucet(SCW_ADDRESS, order.input.tokenAmount);
 
     // get order hash
-    bytes32 orderHash = ROUTER.getLimitOrderHash(order);
+    bytes32 orderStructHash = ROUTER.getLimitOrderStructHash(order);
 
     // get permit2
-    OdosLimitOrderRouter.Permit2Info memory swap_permit = createLimitOrderPermit2(order, context, orderHash, SCW_ADDRESS);
+    OdosLimitOrderRouter.Permit2Info memory swap_permit = createLimitOrderPermit2(order, context, orderStructHash, SCW_ADDRESS);
 
     // get Permit2 with witness hash
-    bytes32 permit2Hash = getPermitWitnessHash(order, context, swap_permit, orderHash, address(ROUTER));
+    bytes32 permit2Hash = getPermitWitnessHash(order, context, swap_permit, orderStructHash, address(ROUTER));
 
     // set expected hash and signature
     SCW.setExpected(permit2Hash, swap_permit.signature);
@@ -797,13 +797,13 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
     MockERC20(order.input.tokenAddress).faucet(SCW_ADDRESS, order.input.tokenAmount);
 
     // get order hash
-    bytes32 orderHash = ROUTER.getLimitOrderHash(order);
+    bytes32 orderStructHash = ROUTER.getLimitOrderStructHash(order);
 
     // get permit2
-    OdosLimitOrderRouter.Permit2Info memory swap_permit = createLimitOrderPermit2(order, context, orderHash, SCW_ADDRESS);
+    OdosLimitOrderRouter.Permit2Info memory swap_permit = createLimitOrderPermit2(order, context, orderStructHash, SCW_ADDRESS);
 
     // set wrong signature, should fail
-    SCW.setExpected(orderHash, "");
+    SCW.setExpected(orderStructHash, "");
 
     // approve Permit2 contract
     vm.prank(SCW_ADDRESS);

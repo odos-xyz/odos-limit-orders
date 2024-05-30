@@ -759,8 +759,8 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
     mintTokens(SIGNER_ADDRESS);
 
     // get permit2
-    bytes32 orderHash = ROUTER.getMultiLimitOrderHash(order);
-    OdosLimitOrderRouter.Permit2Info memory swap_permit = createMultiLimitOrderPermit2(order, context, orderHash, SIGNER_ADDRESS);
+    bytes32 orderStructHash = ROUTER.getMultiLimitOrderStructHash(order);
+    OdosLimitOrderRouter.Permit2Info memory swap_permit = createMultiLimitOrderPermit2(order, context, orderStructHash, SIGNER_ADDRESS);
 
     // approve Permit2 contract
     for (uint256 i = 0; i < order.inputs.length; i++) {
@@ -818,11 +818,11 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
     mintTokens(SCW_ADDRESS);
 
     // get permit2
-    bytes32 orderHash = ROUTER.getMultiLimitOrderHash(order);
-    OdosLimitOrderRouter.Permit2Info memory swap_permit = createMultiLimitOrderPermit2(order, context, orderHash, SCW_ADDRESS);
+    bytes32 orderStructHash = ROUTER.getMultiLimitOrderStructHash(order);
+    OdosLimitOrderRouter.Permit2Info memory swap_permit = createMultiLimitOrderPermit2(order, context, orderStructHash, SCW_ADDRESS);
 
     // get Permit2 with witness hash
-    bytes32 permit2Hash = getBatchPermitWitnessHash(order, context, swap_permit, orderHash, address(ROUTER));
+    bytes32 permit2Hash = getBatchPermitWitnessHash(order, context, swap_permit, orderStructHash, address(ROUTER));
 
     // set expected hash and signature
     SCW.setExpected(permit2Hash, swap_permit.signature);

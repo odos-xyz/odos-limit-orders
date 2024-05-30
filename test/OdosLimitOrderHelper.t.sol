@@ -66,6 +66,33 @@ contract OdosLimitOrderHelperTest is Test, EIP712("OdosLimitOrders", "1"), IERC2
   }
 
   /// Creates a limit order with default parameters which can be overridden if necessary before signing the order
+  function getLimitOrderWitnessTypeHash()
+  public
+  view
+  returns (
+    bytes32 typeHash
+  )
+  {
+    return keccak256(abi.encodePacked(
+      "PermitWitnessTransferFrom(TokenPermissions permitted,address spender,uint256 nonce,uint256 deadline,",
+      ROUTER.LIMIT_ORDER_WITNESS_TYPE_STRING()
+    ));
+  }
+  /// Creates a limit order with default parameters which can be overridden if necessary before signing the order
+  function getMultiLimitOrderWitnessTypeHash()
+  public
+  view
+  returns (
+    bytes32 typeHash
+  )
+  {
+    return keccak256(abi.encodePacked(
+      "PermitBatchWitnessTransferFrom(TokenPermissions[] permitted,address spender,uint256 nonce,uint256 deadline,",
+      ROUTER.MULTI_LIMIT_ORDER_WITNESS_TYPE_STRING()
+    ));
+  }
+
+  /// Creates a limit order with default parameters which can be overridden if necessary before signing the order
   function createDefaultLimitOrder()
   public
   view
@@ -265,7 +292,7 @@ contract OdosLimitOrderHelperTest is Test, EIP712("OdosLimitOrders", "1"), IERC2
       "\x19\x01",
       ISignatureTransfer(address(PERMIT2)).DOMAIN_SEPARATOR(),
       keccak256(abi.encode(
-        ROUTER.LIMIT_ORDER_WITNESS_TYPEHASH(),
+        getLimitOrderWitnessTypeHash(),
         keccak256(abi.encode(
           TOKEN_PERMISSIONS_TYPEHASH,
           ISignatureTransfer.TokenPermissions(
@@ -304,7 +331,7 @@ contract OdosLimitOrderHelperTest is Test, EIP712("OdosLimitOrders", "1"), IERC2
         ISignatureTransfer(address(PERMIT2)).DOMAIN_SEPARATOR(),
         keccak256(
           abi.encode(
-            ROUTER.MULTI_LIMIT_ORDER_WITNESS_TYPEHASH(),
+            getMultiLimitOrderWitnessTypeHash(),
             keccak256(abi.encodePacked(tokenPermissions)),
             spender,
             permit.nonce,
@@ -411,7 +438,7 @@ contract OdosLimitOrderHelperTest is Test, EIP712("OdosLimitOrders", "1"), IERC2
       "\x19\x01",
       ISignatureTransfer(permit2.contractAddress).DOMAIN_SEPARATOR(),
       keccak256(abi.encode(
-        ROUTER.LIMIT_ORDER_WITNESS_TYPEHASH(),
+        getLimitOrderWitnessTypeHash(),
         keccak256(abi.encode(
           TOKEN_PERMISSIONS_TYPEHASH,
           ISignatureTransfer.TokenPermissions({token: order.input.tokenAddress, amount:context.currentAmount})
@@ -453,7 +480,7 @@ contract OdosLimitOrderHelperTest is Test, EIP712("OdosLimitOrders", "1"), IERC2
         ISignatureTransfer(permit2.contractAddress).DOMAIN_SEPARATOR(),
         keccak256(
           abi.encode(
-            ROUTER.MULTI_LIMIT_ORDER_WITNESS_TYPEHASH(),
+            getMultiLimitOrderWitnessTypeHash(),
             keccak256(abi.encodePacked(tokenPermissions)),
             spender,
             permit2.nonce,
