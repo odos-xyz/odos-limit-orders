@@ -198,111 +198,57 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
   /// @dev Allowed order fillers
   mapping(address => bool) public allowedFillers;
 
+  /// @dev Type strings for EIP-712 signing
+  bytes internal constant TOKEN_PERMISSIONS_TYPE_STRING = "TokenPermissions(address token,uint256 amount)";
+
+  bytes internal constant TOKEN_INFO_TYPE_STRING = "TokenInfo(address tokenAddress,uint256 tokenAmount)";
+
+  bytes internal constant LIMIT_ORDER_TYPE_STRING = 
+    "LimitOrder("
+      "TokenInfo input,"
+      "TokenInfo output,"
+      "uint256 expiry,"
+      "uint256 salt,"
+      "uint32 referralCode,"
+      "bool partiallyFillable"
+    ")";
+
+  bytes internal constant MULTI_LIMIT_ORDER_TYPE_STRING =
+    "MultiLimitOrder("
+      "TokenInfo[] inputs,"
+      "TokenInfo[] outputs,"
+      "uint256 expiry,"
+      "uint256 salt,"
+      "uint32 referralCode,"
+      "bool partiallyFillable"
+    ")";
+
+  string public constant LIMIT_ORDER_WITNESS_TYPE_STRING = string(abi.encodePacked(
+    "LimitOrder witness)",
+    LIMIT_ORDER_TYPE_STRING,
+    TOKEN_INFO_TYPE_STRING,
+    TOKEN_PERMISSIONS_TYPE_STRING
+  ));
+
+  string public constant MULTI_LIMIT_ORDER_WITNESS_TYPE_STRING = string(abi.encodePacked(
+    "MultiLimitOrder witness)",
+    MULTI_LIMIT_ORDER_TYPE_STRING,
+    TOKEN_INFO_TYPE_STRING,
+    TOKEN_PERMISSIONS_TYPE_STRING
+  ));
+
   /// @dev Type hashes for EIP-712 signing
-  bytes32 public constant TOKEN_INFO_TYPEHASH = keccak256(
-    "TokenInfo("
-      "address tokenAddress,"
-      "uint256 tokenAmount"
-    ")"
-  );
+  bytes32 public constant TOKEN_INFO_TYPEHASH = keccak256(TOKEN_INFO_TYPE_STRING);
 
-  bytes32 public constant LIMIT_ORDER_TYPEHASH = keccak256(
-    "LimitOrder("
-      "TokenInfo input,"
-      "TokenInfo output,"
-      "uint256 expiry,"
-      "uint256 salt,"
-      "uint32 referralCode,"
-      "bool partiallyFillable"
-    ")"
-    "TokenInfo("
-      "address tokenAddress,"
-      "uint256 tokenAmount"
-    ")"
-  );
+  bytes32 public constant LIMIT_ORDER_TYPEHASH = keccak256(abi.encodePacked(
+    LIMIT_ORDER_TYPE_STRING, 
+    TOKEN_INFO_TYPE_STRING
+  ));
 
-  bytes32 public constant MULTI_LIMIT_ORDER_TYPEHASH = keccak256(
-    "MultiLimitOrder("
-      "TokenInfo[] inputs,"
-      "TokenInfo[] outputs,"
-      "uint256 expiry,"
-      "uint256 salt,"
-      "uint32 referralCode,"
-      "bool partiallyFillable"
-    ")"
-    "TokenInfo("
-      "address tokenAddress,"
-      "uint256 tokenAmount"
-    ")"
-  );
-
-  bytes32 public constant LIMIT_ORDER_WITNESS_TYPEHASH = keccak256(
-    "PermitWitnessTransferFrom(TokenPermissions permitted,address spender,uint256 nonce,uint256 deadline,"
-    "LimitOrder order)"
-    "LimitOrder("
-      "TokenInfo input,"
-      "TokenInfo output,"
-      "uint256 expiry,"
-      "uint256 salt,"
-      "uint32 referralCode,"
-      "bool partiallyFillable"
-    ")"
-    "TokenInfo("
-      "address tokenAddress,"
-      "uint256 tokenAmount"
-    ")"
-    "TokenPermissions(address token,uint256 amount)"
-  );
-
-  bytes32 public constant MULTI_LIMIT_ORDER_WITNESS_TYPEHASH = keccak256(
-    "PermitBatchWitnessTransferFrom(TokenPermissions[] permitted,address spender,uint256 nonce,uint256 deadline,"
-    "MultiLimitOrder order)"
-    "MultiLimitOrder("
-      "TokenInfo[] inputs,"
-      "TokenInfo[] outputs,"
-      "uint256 expiry,"
-      "uint256 salt,"
-      "uint32 referralCode,"
-      "bool partiallyFillable"
-    ")"
-    "TokenInfo("
-      "address tokenAddress,"
-      "uint256 tokenAmount"
-    ")"
-    "TokenPermissions(address token,uint256 amount)"
-  );
-
-  string public constant LIMIT_ORDER_WITNESS_TYPE_STRING =
-    "LimitOrder order)"
-    "LimitOrder("
-      "TokenInfo input,"
-      "TokenInfo output,"
-      "uint256 expiry,"
-      "uint256 salt,"
-      "uint32 referralCode,"
-      "bool partiallyFillable"
-    ")"
-    "TokenInfo("
-      "address tokenAddress,"
-      "uint256 tokenAmount"
-    ")"
-    "TokenPermissions(address token,uint256 amount)";
-
-  string public constant MULTI_LIMIT_ORDER_WITNESS_TYPE_STRING =
-    "MultiLimitOrder order)"
-    "MultiLimitOrder("
-      "TokenInfo[] inputs,"
-      "TokenInfo[] outputs,"
-      "uint256 expiry,"
-      "uint256 salt,"
-      "uint32 referralCode,"
-      "bool partiallyFillable"
-    ")"
-    "TokenInfo("
-      "address tokenAddress,"
-      "uint256 tokenAmount"
-    ")"
-    "TokenPermissions(address token,uint256 amount)";
+  bytes32 public constant MULTI_LIMIT_ORDER_TYPEHASH = keccak256(abi.encodePacked(
+    MULTI_LIMIT_ORDER_TYPE_STRING, 
+    TOKEN_INFO_TYPE_STRING
+  ));
 
   /// @param _odosRouterV2 OdosRouterV2 address
   constructor(address _odosRouterV2)
@@ -365,7 +311,8 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
     _limitOrderChecks(order);
 
     // 4. Get order hash
-    orderHash = getLimitOrderHash(order);
+    bytes32 orderStructHash = getLimitOrderStructHash(order);
+    orderHash = _hashTypedDataV4(orderStructHash);
 
     // 5. No need to recover address as it is set in Permit2Info
 
@@ -387,7 +334,7 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
         context.currentAmount
       ),
       permit2.orderOwner,
-      orderHash,
+      orderStructHash,
       LIMIT_ORDER_WITNESS_TYPE_STRING,
       permit2.signature
     );
@@ -450,7 +397,8 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
     _multiOrderChecks(order);
 
     // 4. Get order hash
-    orderHash = getMultiLimitOrderHash(order);
+    bytes32 orderStructHash = getMultiLimitOrderStructHash(order);
+    orderHash = _hashTypedDataV4(orderStructHash);
 
     // 5. No need to recover address as it is set in Permit2Info
 
@@ -482,7 +430,7 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
       permit,
       transferDetails,
       permit2.orderOwner,
-      orderHash,
+      orderStructHash,
       MULTI_LIMIT_ORDER_WITNESS_TYPE_STRING,
       permit2.signature
     );
@@ -652,37 +600,38 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
     return abi.encode(TOKEN_INFO_TYPEHASH, tokenInfo.tokenAddress, tokenInfo.tokenAmount);
   }
 
-  /// @notice Encodes LimitOrder struct according to EIP-712
+  /// @notice gets LimitOrder struct hash according to EIP-712
   /// @param order LimitOrder struct
-  /// @return Encoded struct
-  function encodeLimitOrder(
+  /// @return structHash EIP-712 struct hash
+  function getLimitOrderStructHash(
     LimitOrder calldata order
   )
   public
   pure
-  returns (bytes memory)
+  returns (bytes32 structHash)
   {
-    return
-      abi.encode(
-      LIMIT_ORDER_TYPEHASH,
-      keccak256(encodeTokenInfo(order.input)),
-      keccak256(encodeTokenInfo(order.output)),
-      order.expiry,
-      order.salt,
-      order.referralCode,
-      order.partiallyFillable
+    return keccak256(
+        abi.encode(
+        LIMIT_ORDER_TYPEHASH,
+        keccak256(encodeTokenInfo(order.input)),
+        keccak256(encodeTokenInfo(order.output)),
+        order.expiry,
+        order.salt,
+        order.referralCode,
+        order.partiallyFillable
+      )
     );
   }
 
-  /// @notice Encodes MultiLimitOrder struct according to EIP-712
+  /// @notice gets MultiLimitOrder struct hash according to EIP-712
   /// @param order MultiLimitOrder struct
-  /// @return Encoded struct
-  function encodeMultiLimitOrder(
+  /// @return structHash EIP-712 struct hash
+  function getMultiLimitOrderStructHash(
     MultiLimitOrder calldata order
   )
   public
   pure
-  returns (bytes memory)
+  returns (bytes32 structHash)
   {
     bytes32[] memory encodedInputs = new bytes32[](order.inputs.length);
     for (uint256 i = 0; i < order.inputs.length; i++) {
@@ -693,15 +642,16 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
       encodedOutputs[i] = keccak256(encodeTokenInfo(order.outputs[i]));
     }
 
-    return
-      abi.encode(
-      MULTI_LIMIT_ORDER_TYPEHASH,
-      keccak256(abi.encodePacked(encodedInputs)),
-      keccak256(abi.encodePacked(encodedOutputs)),
-      order.expiry,
-      order.salt,
-      order.referralCode,
-      order.partiallyFillable
+    return keccak256(
+        abi.encode(
+        MULTI_LIMIT_ORDER_TYPEHASH,
+        keccak256(abi.encodePacked(encodedInputs)),
+        keccak256(abi.encodePacked(encodedOutputs)),
+        order.expiry,
+        order.salt,
+        order.referralCode,
+        order.partiallyFillable
+      )
     );
   }
 
@@ -713,7 +663,7 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
   view
   returns (bytes32 hash)
   {
-    return _hashTypedDataV4(keccak256(encodeLimitOrder(order)));
+    return _hashTypedDataV4(getLimitOrderStructHash(order));
   }
 
   /// @notice Returns multi input limit order hash
@@ -726,7 +676,7 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
   view
   returns (bytes32 hash)
   {
-    return _hashTypedDataV4(keccak256(encodeMultiLimitOrder(order)));
+    return _hashTypedDataV4(getMultiLimitOrderStructHash(order));
   }
 
   /// @dev Checks order parameters and current order state before execution
