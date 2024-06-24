@@ -479,10 +479,12 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
     helper.filledOutputAmounts[0] = amountOut1;
     helper.filledOutputAmounts[1] = amountOut2;
 
+    bytes32 orderHash = ROUTER.getMultiLimitOrderHash(order);
+
     // check that event is emitted, check all topics
     vm.expectEmit(true, true, true, true);
     emit MultiLimitOrderFilled(
-      ROUTER.getMultiLimitOrderHash(order),
+      orderHash,
       SIGNER_ADDRESS,
       helper.inputTokens,
       helper.outputTokens,
@@ -504,6 +506,9 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
 
     assertTrue(IERC20(order.outputs[0].tokenAddress).balanceOf(SIGNER_ADDRESS) - balancesBefore[0] == amountOut1);
     assertTrue(IERC20(order.outputs[1].tokenAddress).balanceOf(SIGNER_ADDRESS) - balancesBefore[1] == amountOut2);
+
+    assertTrue(ROUTER.multiLimitOrders(SIGNER_ADDRESS, orderHash, 0) == context.currentAmounts[0]);
+    assertTrue(ROUTER.multiLimitOrders(SIGNER_ADDRESS, orderHash, 1) == context.currentAmounts[1]);
   }
 
 // 6. Check if fill possible:
@@ -575,10 +580,12 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
     helper.filledOutputAmounts[0] = amountOut1;
     helper.filledOutputAmounts[1] = amountOut2;
 
+    bytes32 orderHash = ROUTER.getMultiLimitOrderHash(order);
+
     // check that event is emitted, check all topics
     vm.expectEmit(true, true, true, true);
     emit MultiLimitOrderFilled(
-      ROUTER.getMultiLimitOrderHash(order),
+      orderHash,
       SIGNER_ADDRESS,
       helper.inputTokens,
       helper.outputTokens,
@@ -600,6 +607,9 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
 
     assertTrue(IERC20(order.outputs[0].tokenAddress).balanceOf(SIGNER_ADDRESS) - balancesBefore[0] == amountOut1);
     assertTrue(IERC20(order.outputs[1].tokenAddress).balanceOf(SIGNER_ADDRESS) - balancesBefore[1] == amountOut2);
+
+    assertTrue(ROUTER.multiLimitOrders(SIGNER_ADDRESS, orderHash, 0) == order.inputs[0].tokenAmount);
+    assertTrue(ROUTER.multiLimitOrders(SIGNER_ADDRESS, orderHash, 1) == order.inputs[1].tokenAmount);
   }
 
 // 6. Check if fill possible:
@@ -738,8 +748,19 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
       0
     );
 
+    uint256[] memory balancesBefore = new uint256[](2);
+    for(uint256 i = 0; i < order.inputs.length; i++) {
+      balancesBefore[i] = IERC20(order.outputs[i].tokenAddress).balanceOf(SIGNER_ADDRESS);
+    }
+
     // run test
     ROUTER.fillMultiLimitOrder(order, signature, context);
+
+    assertTrue(IERC20(order.outputs[0].tokenAddress).balanceOf(SIGNER_ADDRESS) - balancesBefore[0] == amountOut1);
+    assertTrue(IERC20(order.outputs[1].tokenAddress).balanceOf(SIGNER_ADDRESS) - balancesBefore[1] == amountOut2);
+
+    assertTrue(ROUTER.multiLimitOrders(SIGNER_ADDRESS, orderHash, 0) == order.inputs[0].tokenAmount);
+    assertTrue(ROUTER.multiLimitOrders(SIGNER_ADDRESS, orderHash, 1) == order.inputs[1].tokenAmount);
   }
 
   function test_multi_permit2_multi_succeeds() public {
@@ -773,12 +794,14 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
       balancesBefore[i] = IERC20(order.outputs[i].tokenAddress).balanceOf(SIGNER_ADDRESS);
     }
 
+    bytes32 orderHash = ROUTER.getMultiLimitOrderHash(order);
+
     MultiLimitOrderHelper memory helper = getOrderHelper(order);
 
     // check that event is emitted, check all topics
     vm.expectEmit(true, true, true, true);
     emit MultiLimitOrderFilled(
-      ROUTER.getMultiLimitOrderHash(order),
+      orderHash,
       SIGNER_ADDRESS,
       helper.inputTokens,
       helper.outputTokens,
@@ -795,6 +818,9 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
 
     assertTrue(IERC20(order.outputs[0].tokenAddress).balanceOf(SIGNER_ADDRESS) - balancesBefore[0] == amountOut1);
     assertTrue(IERC20(order.outputs[1].tokenAddress).balanceOf(SIGNER_ADDRESS) - balancesBefore[1] == amountOut2);
+
+    assertTrue(ROUTER.multiLimitOrders(SIGNER_ADDRESS, orderHash, 0) == order.inputs[0].tokenAmount);
+    assertTrue(ROUTER.multiLimitOrders(SIGNER_ADDRESS, orderHash, 1) == order.inputs[1].tokenAmount);
   }
 
   function test_multi_permit2_EIP1271_multi_succeeds() public {
@@ -838,12 +864,14 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
       balancesBefore[i] = IERC20(order.outputs[i].tokenAddress).balanceOf(SCW_ADDRESS);
     }
 
+    bytes32 orderHash = ROUTER.getMultiLimitOrderHash(order);
+
     MultiLimitOrderHelper memory helper = getOrderHelper(order);
 
     // check that event is emitted, check all topics
     vm.expectEmit(true, true, true, true);
     emit MultiLimitOrderFilled(
-      ROUTER.getMultiLimitOrderHash(order),
+      orderHash,
       SCW_ADDRESS,
       helper.inputTokens,
       helper.outputTokens,
@@ -860,6 +888,9 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
 
     assertTrue(IERC20(order.outputs[0].tokenAddress).balanceOf(SCW_ADDRESS) - balancesBefore[0] == amountOut1);
     assertTrue(IERC20(order.outputs[1].tokenAddress).balanceOf(SCW_ADDRESS) - balancesBefore[1] == amountOut2);
+
+    assertTrue(ROUTER.multiLimitOrders(SCW_ADDRESS, orderHash, 0) == order.inputs[0].tokenAmount);
+    assertTrue(ROUTER.multiLimitOrders(SCW_ADDRESS, orderHash, 1) == order.inputs[1].tokenAmount);
   }
 
   function test_multi_referralCodeFee_succeeds() public {
@@ -892,6 +923,8 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
       balancesBefore[i] = IERC20(order.outputs[i].tokenAddress).balanceOf(SIGNER_ADDRESS);
     }
 
+    bytes32 orderHash = ROUTER.getMultiLimitOrderHash(order);
+
     MultiLimitOrderHelper memory helper = getOrderHelper(order);
 
     helper.surplus[0] = amountOut1 - amountOut1 * REFERRAL_FEE / FEE_DENOM - order.outputs[0].tokenAmount;
@@ -900,7 +933,7 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
     // check that event is emitted, check all topics
     vm.expectEmit(true, true, true, true);
     emit MultiLimitOrderFilled(
-      ROUTER.getMultiLimitOrderHash(order),
+      orderHash,
       SIGNER_ADDRESS,
       helper.inputTokens,
       helper.outputTokens,
@@ -920,6 +953,9 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
 
     assert(IERC20(order.outputs[0].tokenAddress).balanceOf(SIGNER_ADDRESS) - balancesBefore[0] == order.outputs[0].tokenAmount);
     assert(IERC20(order.outputs[1].tokenAddress).balanceOf(SIGNER_ADDRESS) - balancesBefore[1] == order.outputs[1].tokenAmount);
+
+    assertTrue(ROUTER.multiLimitOrders(SIGNER_ADDRESS, orderHash, 0) == order.inputs[0].tokenAmount);
+    assertTrue(ROUTER.multiLimitOrders(SIGNER_ADDRESS, orderHash, 1) == order.inputs[1].tokenAmount);
   }
 
   function test_multi_referralCodeFee_reverts() public {
@@ -974,13 +1010,14 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
     for(uint256 i = 0; i < order.inputs.length; i++) {
       balancesBefore[i] = IERC20(order.outputs[i].tokenAddress).balanceOf(SIGNER_ADDRESS);
     }
+    bytes32 orderHash = ROUTER.getMultiLimitOrderHash(order);
 
     MultiLimitOrderHelper memory helper = getOrderHelper(order);
 
     // check that event is emitted, check all topics
     vm.expectEmit(true, true, true, true);
     emit MultiLimitOrderFilled(
-      ROUTER.getMultiLimitOrderHash(order),
+      orderHash,
       SIGNER_ADDRESS,
       helper.inputTokens,
       helper.outputTokens,
@@ -997,6 +1034,9 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
 
     assertTrue(IERC20(order.outputs[0].tokenAddress).balanceOf(SIGNER_ADDRESS) - balancesBefore[0] == amountOut1);
     assertTrue(IERC20(order.outputs[1].tokenAddress).balanceOf(SIGNER_ADDRESS) - balancesBefore[1] == amountOut2);
+
+    assertTrue(ROUTER.multiLimitOrders(SIGNER_ADDRESS, orderHash, 0) == order.inputs[0].tokenAmount);
+    assertTrue(ROUTER.multiLimitOrders(SIGNER_ADDRESS, orderHash, 1) == order.inputs[1].tokenAmount);
   }
 
   function test_multi_surplusCheck_reverts() public {

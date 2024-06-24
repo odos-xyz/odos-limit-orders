@@ -73,10 +73,12 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
 
     uint256 usdcBalanceBefore = IERC20(USDC).balanceOf(SIGNER_ADDRESS);
 
+    bytes32 orderHash = ROUTER.getLimitOrderHash(order);
+
     // check that event is emitted, check all topics
     vm.expectEmit(true, true, true, true);
     emit LimitOrderFilled(
-      ROUTER.getLimitOrderHash(order),
+      orderHash,
       SIGNER_ADDRESS,
       DAI,
       USDC,
@@ -93,6 +95,8 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
 
     uint256 usdcBalanceDiff = IERC20(USDC).balanceOf(SIGNER_ADDRESS) - usdcBalanceBefore;
     assertTrue(usdcBalanceDiff == 2001 * 1e6);
+
+    assertTrue(ROUTER.limitOrders(SIGNER_ADDRESS, orderHash) == order.input.tokenAmount);
   }
 
 // 1. Check msg.sender allowed
@@ -414,10 +418,12 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
 
     uint256 usdcBalanceBefore = IERC20(USDC).balanceOf(SIGNER_ADDRESS);
 
+    bytes32 orderHash = ROUTER.getLimitOrderHash(order);
+
     // check that event is emitted, check all topics
     vm.expectEmit(true, true, true, true);
     emit LimitOrderFilled(
-      ROUTER.getLimitOrderHash(order),
+      orderHash,
       SIGNER_ADDRESS,
       DAI,
       USDC,
@@ -435,6 +441,8 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
     uint256 usdcBalanceDiff = IERC20(USDC).balanceOf(SIGNER_ADDRESS) - usdcBalanceBefore;
 
     assertTrue(usdcBalanceDiff == 1000 * 1e6);
+
+    assertTrue(ROUTER.limitOrders(SIGNER_ADDRESS, orderHash) == context.currentAmount);
   }
 
 // 6. Check if fill possible:
@@ -495,11 +503,13 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
 
     uint256 usdcBalanceBefore = IERC20(USDC).balanceOf(SIGNER_ADDRESS);
 
+    bytes32 orderHash = ROUTER.getLimitOrderHash(order);
+
     // check that event is emitted, check all topics
     vm.expectEmit(true, true, true, true);
     // only 1 DAI left unfilled
     emit LimitOrderFilled(
-      ROUTER.getLimitOrderHash(order),
+      orderHash,
       SIGNER_ADDRESS,
       DAI,
       USDC,
@@ -516,6 +526,8 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
     uint256 usdcBalanceDiff = IERC20(USDC).balanceOf(SIGNER_ADDRESS) - usdcBalanceBefore;
 
     assertTrue(usdcBalanceDiff == 1000 * 1e6);
+
+    assertTrue(ROUTER.limitOrders(SIGNER_ADDRESS, orderHash) == 2 * context.currentAmount);
   }
 
 // 6. Check if fill possible:
@@ -667,10 +679,12 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
     // get balance before the swap
     uint256 usdcBalanceBefore = IERC20(USDC).balanceOf(SIGNER_ADDRESS);
 
+    bytes32 orderHash = ROUTER.getLimitOrderHash(order);
+
     // check that event is emitted, check all topics
     vm.expectEmit(true, true, true, true);
     emit LimitOrderFilled(
-      ROUTER.getLimitOrderHash(order),
+      orderHash,
       SIGNER_ADDRESS,
       DAI,
       USDC,
@@ -687,6 +701,8 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
 
     uint256 usdcBalanceDiff = IERC20(USDC).balanceOf(SIGNER_ADDRESS) - usdcBalanceBefore;
     assertTrue(usdcBalanceDiff == 2001 * 1e6);
+
+    assertTrue(ROUTER.limitOrders(SIGNER_ADDRESS, orderHash) == order.input.tokenAmount);
   }
 
   function test_permit2_reverts() public {
@@ -756,10 +772,12 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
     // get balance before the swap
     uint256 usdcBalanceBefore = IERC20(USDC).balanceOf(SCW_ADDRESS);
 
+    bytes32 orderHash = ROUTER.getLimitOrderHash(order);
+
     // check that event is emitted, check all topics
     vm.expectEmit(true, true, true, true);
     emit LimitOrderFilled(
-      ROUTER.getLimitOrderHash(order),
+      orderHash,
       SCW_ADDRESS,
       DAI,
       USDC,
@@ -776,6 +794,8 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
 
     uint256 usdcBalanceDiff = IERC20(USDC).balanceOf(SCW_ADDRESS) - usdcBalanceBefore;
     assertTrue(usdcBalanceDiff == 2001 * 1e6);
+
+    assertTrue(ROUTER.limitOrders(SCW_ADDRESS, orderHash) == order.input.tokenAmount);
   }
 
   function test_permit2_EIP1271_reverts() public {
@@ -843,10 +863,12 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
 
     helper.usdcBalanceBefore = IERC20(USDC).balanceOf(SIGNER_ADDRESS);
 
+    bytes32 orderHash = ROUTER.getLimitOrderHash(order);
+
     // check that event is emitted, check all topics
     vm.expectEmit(true, true, true, true);
     emit LimitOrderFilled(
-      ROUTER.getLimitOrderHash(order),
+      orderHash,
       SIGNER_ADDRESS,
       DAI,
       USDC,
@@ -866,6 +888,8 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
 
     // user amount
     assert(IERC20(USDC).balanceOf(SIGNER_ADDRESS) - helper.usdcBalanceBefore == order.output.tokenAmount);
+
+    assertTrue(ROUTER.limitOrders(SIGNER_ADDRESS, orderHash) == order.input.tokenAmount);
   }
 
   function test_referralCodeFee_reverts() public {
@@ -917,10 +941,12 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
 
     uint256 usdcBalanceBefore = IERC20(USDC).balanceOf(SIGNER_ADDRESS);
 
+    bytes32 orderHash = ROUTER.getLimitOrderHash(order);
+
     // check that event is emitted, check all topics
     vm.expectEmit(true, true, true, true);
     emit LimitOrderFilled(
-      ROUTER.getLimitOrderHash(order),
+      orderHash,
       SIGNER_ADDRESS,
       DAI,
       USDC,
@@ -937,6 +963,8 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
 
     uint256 usdcBalanceDiff = IERC20(USDC).balanceOf(SIGNER_ADDRESS) - usdcBalanceBefore;
     assertTrue(usdcBalanceDiff == 2001 * 1e6);
+
+    assertTrue(ROUTER.limitOrders(SIGNER_ADDRESS, orderHash) == order.input.tokenAmount);
   }
 
 

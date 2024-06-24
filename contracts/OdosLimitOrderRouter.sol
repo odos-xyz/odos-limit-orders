@@ -419,6 +419,7 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
       permit.permitted[i].amount = context.currentAmounts[i];
 
       // Fill helper data
+      helper.filledAmounts[i] += context.currentAmounts[i];
       helper.inputTokens[i] = order.inputs[i].tokenAddress;
       helper.orderInputAmounts[i] = context.currentAmounts[i];
 
