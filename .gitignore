@@ -373,3 +373,6 @@ cache/
 coverage/
 report/
 lcov.info
+
+.pyspelling.yaml
+.dictionary.txt

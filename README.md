@@ -1,9 +1,13 @@
 # Odos Limit Order Smart Contract
 
+## Summary
+
+This product allows users to place orders that will be executed at a specified limit price. Orders are placed gaslessly via signed EIP-712 data, and support multiple inputs and multiple outputs.
+
 ### Limit order execution flow
 
-1. Check if msg.sender is allowed 
-2. Check if order still valid 
+1. Check if msg.sender is allowed
+2. Check if order still valid
 3. Check tokens, amounts
 4. Get order hash
 5. Recover order owner account [and validate the signature]
@@ -22,7 +26,11 @@
 16. Transfer tokens to order owner account
 17. Emit LimitOrderFilled (MultiLimitOrderFilled) event
 
+## Deployment Addresses
 
+| Chain | Limit Order Router Address |
+| :-: | :-: |
+| <img src="https://assets.odos.xyz/chains/arbitrum.png" width="50" height="50"><br>Arbitrum | [`0x79cDAB2957289a325dEd1Bf6D3694bB7fEc2b730`](https://arbiscan.io/address/0x79cDAB2957289a325dEd1Bf6D3694bB7fEc2b730) |
 
 ## Smart Contracts
 
@@ -78,3 +86,7 @@ solc-select install 0.8.19
 export SOLC_VERSION=0.8.19
 myth analyze contracts/OdosLimitOrderRouter.sol --solc-json ./mythril.config.json
 ```
+
+## Audit
+
+This contract was audited by [Halborn](https://www.halborn.com/) in April 2024. A link to the report can be found on the [Halborn Website](https://www.halborn.com/audits/odos/limit-orders). A copy of the report is included on this page.
