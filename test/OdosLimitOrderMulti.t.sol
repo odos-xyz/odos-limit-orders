@@ -460,8 +460,13 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
     uint256 humanAmount1 = 1000;
     uint256 humanAmount2 = 1500;
 
-    uint256 amountOut1 = uint256(1e6) * humanAmount1 * 2002 / 1999;
-    uint256 amountOut2 = uint256(1e18) * humanAmount2 * 1998 / 2001;
+    uint256 prorationAmount1 = uint256(1e36) * humanAmount1 / order.inputs[0].tokenAmount;
+    uint256 prorationAmount2 = uint256(1e36) * humanAmount2 / order.inputs[1].tokenAmount;
+
+    uint256 prorationAmount = prorationAmount1 > prorationAmount2 ? prorationAmount1 : prorationAmount2;
+
+    uint256 amountOut1 = prorationAmount * order.outputs[0].tokenAmount / uint256(1e18);
+    uint256 amountOut2 = prorationAmount * order.outputs[1].tokenAmount / uint256(1e18);
 
     // get default executor context
     OdosLimitOrderRouter.MultiLimitOrderContext memory context = getDefaultMultiContext(amountOut1, amountOut2);
@@ -561,8 +566,13 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
     uint256 humanAmount1 = 999;
     uint256 humanAmount2 = 501;
 
-    uint256 amountOut1 = uint256(1e6) * humanAmount1 * 2002 / 1999;
-    uint256 amountOut2 = uint256(1e18) * humanAmount2 * 1998 / 2001;
+    uint256 prorationAmount1 = uint256(1e36) * humanAmount1 / order.inputs[0].tokenAmount;
+    uint256 prorationAmount2 = uint256(1e36) * humanAmount2 / order.inputs[1].tokenAmount;
+
+    uint256 prorationAmount = prorationAmount1 > prorationAmount2 ? prorationAmount1 : prorationAmount2;
+
+    uint256 amountOut1 = prorationAmount * order.outputs[0].tokenAmount / uint256(1e18);
+    uint256 amountOut2 = prorationAmount * order.outputs[1].tokenAmount / uint256(1e18);
 
     // get default executor context
     OdosLimitOrderRouter.MultiLimitOrderContext memory context = getDefaultMultiContext(amountOut1, amountOut2);
@@ -630,8 +640,13 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
     uint256 humanAmount1 = 999;
     uint256 humanAmount2 = 502;
 
-    uint256 amountOut1 = uint256(1e6) * humanAmount1 * 2002 / 1999;
-    uint256 amountOut2 = uint256(1e18) * humanAmount2 * 1998 / 2001;
+    uint256 prorationAmount1 = uint256(1e36) * humanAmount1 / order.inputs[0].tokenAmount;
+    uint256 prorationAmount2 = uint256(1e36) * humanAmount2 / order.inputs[1].tokenAmount;
+
+    uint256 prorationAmount = prorationAmount1 > prorationAmount2 ? prorationAmount1 : prorationAmount2;
+
+    uint256 amountOut1 = prorationAmount * order.outputs[0].tokenAmount / uint256(1e18);
+    uint256 amountOut2 = prorationAmount * order.outputs[1].tokenAmount / uint256(1e18);
 
     // get default executor context
     OdosLimitOrderRouter.MultiLimitOrderContext memory context = getDefaultMultiContext(amountOut1, amountOut2);
@@ -672,8 +687,13 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
     uint256 humanAmount1 = 999;
     uint256 humanAmount2 = 502;
 
-    uint256 amountOut1 = uint256(1e6) * humanAmount1 * 2002 / 1999;
-    uint256 amountOut2 = uint256(1e18) * humanAmount2 * 1998 / 2001;
+    uint256 prorationAmount1 = uint256(1e36) * humanAmount1 / order.inputs[0].tokenAmount;
+    uint256 prorationAmount2 = uint256(1e36) * humanAmount2 / order.inputs[1].tokenAmount;
+
+    uint256 prorationAmount = prorationAmount1 > prorationAmount2 ? prorationAmount1 : prorationAmount2;
+
+    uint256 amountOut1 = prorationAmount * order.outputs[0].tokenAmount / uint256(1e18);
+    uint256 amountOut2 = prorationAmount * order.outputs[1].tokenAmount / uint256(1e18);
 
     // get default executor context
     OdosLimitOrderRouter.MultiLimitOrderContext memory context = getDefaultMultiContext(amountOut1, amountOut2);
