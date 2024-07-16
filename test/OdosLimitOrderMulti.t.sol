@@ -59,16 +59,15 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
       surplus: new uint256[](order.outputs.length)
     });
 
-    helper.inputTokens[0] = DAI;
-    helper.inputTokens[1] = FRAX;
-    helper.outputTokens[0] = USDC;
-    helper.outputTokens[1] = USDT;
-    helper.orderInputAmounts[0] = order.inputs[0].tokenAmount;
-    helper.orderInputAmounts[1] = order.inputs[1].tokenAmount;
-    helper.orderOutputAmounts[0] = order.outputs[0].tokenAmount;
-    helper.orderOutputAmounts[1] = order.outputs[1].tokenAmount;
-    helper.filledOutputAmounts[0] = order.outputs[0].tokenAmount;
-    helper.filledOutputAmounts[1] = order.outputs[1].tokenAmount;
+    for (uint256 i = 0; i < order.inputs.length; i++) {
+      helper.inputTokens[i] = order.inputs[i].tokenAddress;
+      helper.orderInputAmounts[i] = order.inputs[i].tokenAmount;
+    }
+    for (uint256 i = 0; i < order.outputs.length; i++) {
+      helper.outputTokens[i] = order.outputs[i].tokenAddress;
+      helper.orderOutputAmounts[i] = order.outputs[i].tokenAmount;
+      helper.filledOutputAmounts[i] = order.outputs[i].tokenAmount;
+    }
   }
 
   function test_multi_Signature() public {
@@ -841,6 +840,121 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
 
     assertTrue(ROUTER.multiLimitOrders(SIGNER_ADDRESS, orderHash, 0) == order.inputs[0].tokenAmount);
     assertTrue(ROUTER.multiLimitOrders(SIGNER_ADDRESS, orderHash, 1) == order.inputs[1].tokenAmount);
+  }
+
+  function test_one_to_many_permit2_multi_succeeds() public {
+    // create order
+    OdosLimitOrderRouter.MultiLimitOrder memory order = createDefaultOneToManyLimitOrder();
+
+    uint256 amountOut1 = 2002 * 1e6;
+    uint256 amountOut2 = 1998 * 1e18;
+
+    // create execution context
+    OdosLimitOrderRouter.MultiLimitOrderContext memory context = getDefaultOneToManyContext(amountOut1, amountOut2);
+
+    // add to whitelist
+    ROUTER.addAllowedFiller(address(this));
+
+    // mint input tokens
+    mintTokens(SIGNER_ADDRESS);
+
+  
+    // get permit2
+    bytes32 orderStructHash = ROUTER.getMultiLimitOrderStructHash(order);
+    OdosLimitOrderRouter.Permit2Info memory swap_permit = createMultiLimitOrderPermit2(order, context, orderStructHash, SIGNER_ADDRESS);
+
+
+    // approve Permit2 contract
+    for (uint256 i = 0; i < order.inputs.length; i++) {
+      vm.prank(SIGNER_ADDRESS);
+      MockERC20(order.inputs[i].tokenAddress).approve(address(PERMIT2), type(uint256).max);
+    }
+    uint256[] memory balancesBefore = new uint256[](2);
+    for(uint256 i = 0; i < order.inputs.length; i++) {
+      balancesBefore[i] = IERC20(order.outputs[i].tokenAddress).balanceOf(SIGNER_ADDRESS);
+    }
+
+    bytes32 orderHash = ROUTER.getMultiLimitOrderHash(order);
+
+    MultiLimitOrderHelper memory helper = getOrderHelper(order);
+
+    // check that event is emitted, check all topics
+    vm.expectEmit(true, true, true, true);
+    emit MultiLimitOrderFilled(
+      orderHash,
+      SIGNER_ADDRESS,
+      helper.inputTokens,
+      helper.outputTokens,
+      helper.orderInputAmounts,
+      helper.orderOutputAmounts,
+      context.currentAmounts,
+      helper.filledOutputAmounts,
+      helper.surplus,
+      0
+    );
+
+    // run test
+    ROUTER.fillMultiLimitOrderPermit2(order, context, swap_permit);
+
+    assertTrue(IERC20(order.outputs[0].tokenAddress).balanceOf(SIGNER_ADDRESS) - balancesBefore[0] == amountOut1);
+    assertTrue(IERC20(order.outputs[1].tokenAddress).balanceOf(SIGNER_ADDRESS) - balancesBefore[1] == amountOut2);
+
+    assertTrue(ROUTER.multiLimitOrders(SIGNER_ADDRESS, orderHash, 0) == order.inputs[0].tokenAmount);
+  }
+
+  function test_many_to_one_permit2_multi_succeeds() public {
+    // create order
+    OdosLimitOrderRouter.MultiLimitOrder memory order = createDefaultManyToOneLimitOrder();
+
+    uint256 amountOut1 = 2002 * 1e6;
+
+    // create execution context
+    OdosLimitOrderRouter.MultiLimitOrderContext memory context = getDefaultManyToOneContext(amountOut1);
+
+    // add to whitelist
+    ROUTER.addAllowedFiller(address(this));
+
+    // mint input tokens
+    mintTokens(SIGNER_ADDRESS);
+
+    // get permit2
+    bytes32 orderStructHash = ROUTER.getMultiLimitOrderStructHash(order);
+    OdosLimitOrderRouter.Permit2Info memory swap_permit = createMultiLimitOrderPermit2(order, context, orderStructHash, SIGNER_ADDRESS);
+
+    // approve Permit2 contract
+    for (uint256 i = 0; i < order.inputs.length; i++) {
+      vm.prank(SIGNER_ADDRESS);
+      MockERC20(order.inputs[i].tokenAddress).approve(address(PERMIT2), type(uint256).max);
+    }
+
+    uint256[] memory balancesBefore = new uint256[](1);
+    balancesBefore[0] = IERC20(order.outputs[0].tokenAddress).balanceOf(SIGNER_ADDRESS);
+
+    bytes32 orderHash = ROUTER.getMultiLimitOrderHash(order);
+
+    MultiLimitOrderHelper memory helper = getOrderHelper(order);
+
+    // check that event is emitted, check all topics
+    vm.expectEmit(true, true, true, true);
+    emit MultiLimitOrderFilled(
+      orderHash,
+      SIGNER_ADDRESS,
+      helper.inputTokens,
+      helper.outputTokens,
+      helper.orderInputAmounts,
+      helper.orderOutputAmounts,
+      context.currentAmounts,
+      helper.filledOutputAmounts,
+      helper.surplus,
+      0
+    );
+
+    // run test
+    ROUTER.fillMultiLimitOrderPermit2(order, context, swap_permit);
+
+    assertTrue(IERC20(order.outputs[0].tokenAddress).balanceOf(SIGNER_ADDRESS) - balancesBefore[0] == amountOut1);
+
+    assertTrue(ROUTER.multiLimitOrders(SIGNER_ADDRESS, orderHash, 0) == order.inputs[0].tokenAmount);
   }
 
   function test_multi_permit2_EIP1271_multi_succeeds() public {

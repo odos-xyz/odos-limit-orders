@@ -907,7 +907,7 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
         }
       }
     } else {
-      // Set the proration to one, since now parti
+      // Set the proration to one, since no proration needed
       helper.amountProration = SCALE;
 
       // Revert if order was filled or currentAmount is not equal to the order amount
