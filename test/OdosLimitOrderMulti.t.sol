@@ -955,6 +955,7 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
     assertTrue(IERC20(order.outputs[0].tokenAddress).balanceOf(SIGNER_ADDRESS) - balancesBefore[0] == amountOut1);
 
     assertTrue(ROUTER.multiLimitOrders(SIGNER_ADDRESS, orderHash, 0) == order.inputs[0].tokenAmount);
+    assertTrue(ROUTER.multiLimitOrders(SIGNER_ADDRESS, orderHash, 1) == order.inputs[1].tokenAmount);
   }
 
   function test_multi_permit2_EIP1271_multi_succeeds() public {
