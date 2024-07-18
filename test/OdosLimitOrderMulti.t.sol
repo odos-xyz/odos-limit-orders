@@ -103,7 +103,7 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
     ROUTER.addAllowedFiller(address(this));
 
     uint256[] memory balancesBefore = new uint256[](2);
-    for(uint256 i = 0; i < order.inputs.length; i++) {
+    for(uint256 i = 0; i < order.outputs.length; i++) {
       balancesBefore[i] = IERC20(order.outputs[i].tokenAddress).balanceOf(SIGNER_ADDRESS);
     }
 
@@ -152,8 +152,8 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
     // ROUTER.addToWhitelist(address(this));
 
     uint256[] memory balancesBefore = new uint256[](2);
-    for(uint256 i = 0; i < order.inputs.length; i++) {
-      balancesBefore[i] = IERC20(USDC).balanceOf(SIGNER_ADDRESS);
+    for(uint256 i = 0; i < order.outputs.length; i++) {
+      balancesBefore[i] = IERC20(order.outputs[i].tokenAddress).balanceOf(SIGNER_ADDRESS);
     }
 
     vm.expectRevert(abi.encodeWithSelector(AddressNotAllowed.selector, address(this)));
@@ -501,7 +501,7 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
     );
 
     uint256[] memory balancesBefore = new uint256[](2);
-    for(uint256 i = 0; i < order.inputs.length; i++) {
+    for(uint256 i = 0; i < order.outputs.length; i++) {
       balancesBefore[i] = IERC20(order.outputs[i].tokenAddress).balanceOf(SIGNER_ADDRESS);
     }
 
@@ -607,7 +607,7 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
     );
 
     uint256[] memory balancesBefore = new uint256[](2);
-    for(uint256 i = 0; i < order.inputs.length; i++) {
+    for(uint256 i = 0; i < order.outputs.length; i++) {
       balancesBefore[i] = IERC20(order.outputs[i].tokenAddress).balanceOf(SIGNER_ADDRESS);
     }
 
@@ -768,7 +768,7 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
     );
 
     uint256[] memory balancesBefore = new uint256[](2);
-    for(uint256 i = 0; i < order.inputs.length; i++) {
+    for(uint256 i = 0; i < order.outputs.length; i++) {
       balancesBefore[i] = IERC20(order.outputs[i].tokenAddress).balanceOf(SIGNER_ADDRESS);
     }
 
@@ -809,7 +809,7 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
     }
 
     uint256[] memory balancesBefore = new uint256[](2);
-    for(uint256 i = 0; i < order.inputs.length; i++) {
+    for(uint256 i = 0; i < order.outputs.length; i++) {
       balancesBefore[i] = IERC20(order.outputs[i].tokenAddress).balanceOf(SIGNER_ADDRESS);
     }
 
@@ -870,7 +870,7 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
       MockERC20(order.inputs[i].tokenAddress).approve(address(PERMIT2), type(uint256).max);
     }
     uint256[] memory balancesBefore = new uint256[](2);
-    for(uint256 i = 0; i < order.inputs.length; i++) {
+    for(uint256 i = 0; i < order.outputs.length; i++) {
       balancesBefore[i] = IERC20(order.outputs[i].tokenAddress).balanceOf(SIGNER_ADDRESS);
     }
 
@@ -995,8 +995,8 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
     }
 
     uint256[] memory balancesBefore = new uint256[](2);
-    for(uint256 i = 0; i < order.inputs.length; i++) {
-      balancesBefore[i] = IERC20(order.outputs[i].tokenAddress).balanceOf(SCW_ADDRESS);
+    for(uint256 i = 0; i < order.outputs.length; i++) {
+      balancesBefore[i] = IERC20(order.outputs[i].tokenAddress).balanceOf(SIGNER_ADDRESS);
     }
 
     bytes32 orderHash = ROUTER.getMultiLimitOrderHash(order);
@@ -1054,7 +1054,7 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
     ROUTER.addAllowedFiller(address(this));
 
     uint256[] memory balancesBefore = new uint256[](2);
-    for(uint256 i = 0; i < order.inputs.length; i++) {
+    for(uint256 i = 0; i < order.outputs.length; i++) {
       balancesBefore[i] = IERC20(order.outputs[i].tokenAddress).balanceOf(SIGNER_ADDRESS);
     }
 
@@ -1142,7 +1142,7 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
     ROUTER.addAllowedFiller(address(this));
 
     uint256[] memory balancesBefore = new uint256[](2);
-    for(uint256 i = 0; i < order.inputs.length; i++) {
+    for(uint256 i = 0; i < order.outputs.length; i++) {
       balancesBefore[i] = IERC20(order.outputs[i].tokenAddress).balanceOf(SIGNER_ADDRESS);
     }
     bytes32 orderHash = ROUTER.getMultiLimitOrderHash(order);
@@ -1195,7 +1195,7 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
     ROUTER.addAllowedFiller(address(this));
 
     uint256[] memory balancesBefore = new uint256[](2);
-    for(uint256 i = 0; i < order.inputs.length; i++) {
+    for(uint256 i = 0; i < order.outputs.length; i++) {
       balancesBefore[i] = IERC20(order.outputs[i].tokenAddress).balanceOf(SIGNER_ADDRESS);
     }
 
