@@ -171,6 +171,7 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
     uint256[] balancesBefore;
     address orderOwner;
     bytes32 orderHash;
+    uint256 amountProration;
   }
 
   /// @dev Contains information required for Permit2 token transfer
@@ -874,7 +875,8 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
       surplus: new uint256[](order.outputs.length),
       balancesBefore: new uint256[](order.outputs.length),
       orderOwner : orderOwner,
-      orderHash : orderHash
+      orderHash : orderHash,
+      amountProration: 0
     });
 
     // 6. Extract previously filled amounts for order from storage, or create
@@ -898,8 +900,16 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
           revert CurrentAmountMismatch(order.inputs[i].tokenAddress, order.inputs[i].tokenAmount,
             helper.filledAmounts[i], context.currentAmounts[i]);
         }
+        // Set the maximum input proration
+        uint256 thisAmountProration = SCALE * context.currentAmounts[i] / order.inputs[i].tokenAmount;
+        if (thisAmountProration > helper.amountProration) {
+          helper.amountProration = thisAmountProration;
+        }
       }
     } else {
+      // Set the proration to one, since no proration needed
+      helper.amountProration = SCALE;
+
       // Revert if order was filled or currentAmount is not equal to the order amount
       for (uint256 i = 0; i < helper.filledAmounts.length; i++) {
         if (helper.filledAmounts[i] > 0 || context.currentAmounts[i] != order.inputs[i].tokenAmount) {
@@ -955,7 +965,7 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
         }
 
         // calculate prorated output amount in case of partial fill, otherwise it will be equal to order.output.tokenAmount
-        uint256 proratedAmount = SCALE * order.outputs[i].tokenAmount * context.currentAmounts[i] / order.inputs[i].tokenAmount / SCALE;
+        uint256 proratedAmount = helper.amountProration * order.outputs[i].tokenAmount / SCALE;
 
         // 14. Check slippage, adjust amountOut
         if (amountsOut[i] < proratedAmount) {

@@ -189,6 +189,52 @@ contract OdosLimitOrderHelperTest is Test, EIP712("OdosLimitOrders", "1"), IERC2
       partiallyFillable: false
     });
   }
+  function createDefaultManyToOneLimitOrder()
+  public
+  view
+  returns (
+    OdosLimitOrderRouter.MultiLimitOrder memory order
+  ) {
+    // Construct Limit Order
+    OdosLimitOrderRouter.TokenInfo[] memory inputs = new OdosLimitOrderRouter.TokenInfo[](2);
+    inputs[0] = OdosLimitOrderRouter.TokenInfo(DAI, 1999 * 1e18);
+    inputs[1] = OdosLimitOrderRouter.TokenInfo(FRAX, 2001 * 1e18);
+
+    OdosLimitOrderRouter.TokenInfo[] memory outputs = new OdosLimitOrderRouter.TokenInfo[](1);
+    outputs[0] = OdosLimitOrderRouter.TokenInfo(USDC, 2002 * 1e6);
+
+    order = OdosLimitOrderRouter.MultiLimitOrder({
+      inputs: inputs,
+      outputs: outputs,
+      salt: 1,
+      expiry: block.timestamp + 86400,
+      referralCode: 0,
+      partiallyFillable: false
+    });
+  }
+  function createDefaultOneToManyLimitOrder()
+  public
+  view
+  returns (
+    OdosLimitOrderRouter.MultiLimitOrder memory order
+  ) {
+    // Construct Limit Order
+    OdosLimitOrderRouter.TokenInfo[] memory inputs = new OdosLimitOrderRouter.TokenInfo[](1);
+    inputs[0] = OdosLimitOrderRouter.TokenInfo(DAI, 1999 * 1e18);
+
+    OdosLimitOrderRouter.TokenInfo[] memory outputs = new OdosLimitOrderRouter.TokenInfo[](2);
+    outputs[0] = OdosLimitOrderRouter.TokenInfo(USDC, 2002 * 1e6);
+    outputs[1] = OdosLimitOrderRouter.TokenInfo(USDT, 1998 * 1e18);
+
+    order = OdosLimitOrderRouter.MultiLimitOrder({
+      inputs: inputs,
+      outputs: outputs,
+      salt: 1,
+      expiry: block.timestamp + 86400,
+      referralCode: 0,
+      partiallyFillable: false
+    });
+  }
 
   function getDefaultMultiContext(
     uint256 amountOut1,
@@ -217,6 +263,75 @@ contract OdosLimitOrderHelperTest is Test, EIP712("OdosLimitOrders", "1"), IERC2
     inputReceivers[1] = address(ROUTER);
 
     uint256[] memory minSurplus = new uint256[](2);
+
+    // fill the executor context
+    context = OdosLimitOrderRouter.MultiLimitOrderContext({
+      pathDefinition: abi.encode(tokensOut, amountsOut),
+      odosExecutor: address(ODOS_EXECUTOR),
+      currentAmounts: currentAmounts,
+      inputReceivers: inputReceivers,
+      minSurplus: minSurplus
+    });
+  }
+  function getDefaultOneToManyContext(
+    uint256 amountOut1,
+    uint256 amountOut2
+  )
+  public
+  view
+  returns (
+    OdosLimitOrderRouter.MultiLimitOrderContext memory context
+  ) {
+    // prepare executor outcome
+    address[] memory tokensOut = new address[](2);
+    tokensOut[0] = USDC;
+    tokensOut[1] = USDT;
+
+    uint256[] memory amountsOut = new uint256[](2);
+    amountsOut[0] = amountOut1;
+    amountsOut[1] = amountOut2;
+
+    uint256[] memory currentAmounts = new uint256[](1);
+    currentAmounts[0] = 1999 * 1e18;
+
+    address[] memory inputReceivers = new address[](1);
+    inputReceivers[0] = address(ROUTER);
+
+    uint256[] memory minSurplus = new uint256[](2);
+
+    // fill the executor context
+    context = OdosLimitOrderRouter.MultiLimitOrderContext({
+      pathDefinition: abi.encode(tokensOut, amountsOut),
+      odosExecutor: address(ODOS_EXECUTOR),
+      currentAmounts: currentAmounts,
+      inputReceivers: inputReceivers,
+      minSurplus: minSurplus
+    });
+  }
+  function getDefaultManyToOneContext(
+    uint256 amountOut1
+  )
+  public
+  view
+  returns (
+    OdosLimitOrderRouter.MultiLimitOrderContext memory context
+  ) {
+    // prepare executor outcome
+    address[] memory tokensOut = new address[](1);
+    tokensOut[0] = USDC;
+
+    uint256[] memory amountsOut = new uint256[](1);
+    amountsOut[0] = amountOut1;
+
+    uint256[] memory currentAmounts = new uint256[](2);
+    currentAmounts[0] = 1999 * 1e18;
+    currentAmounts[1] = 2001 * 1e18;
+
+    address[] memory inputReceivers = new address[](2);
+    inputReceivers[0] = address(ROUTER);
+    inputReceivers[1] = address(ROUTER);
+
+    uint256[] memory minSurplus = new uint256[](1);
 
     // fill the executor context
     context = OdosLimitOrderRouter.MultiLimitOrderContext({
