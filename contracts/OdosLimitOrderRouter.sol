@@ -44,7 +44,7 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
   address immutable private ODOS_ROUTER_V2;
 
   /// @dev Address which allowed to call `swapRouterFunds()` besides the owner
-  address private liquidatorAddress;
+  address public liquidatorAddress;
 
   /// @dev Event emitted on successful single input limit order execution
   event LimitOrderFilled(
@@ -539,8 +539,10 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
     address dest
   )
   external
-  onlyOwner
   {
+    if (msg.sender != liquidatorAddress && msg.sender != owner()) {
+      revert AddressNotAllowed(msg.sender);
+    }
     if (dest == address(0)) {
       revert InvalidAddress(dest);
     }

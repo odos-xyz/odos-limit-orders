@@ -350,7 +350,7 @@ contract OdosLimitOrderRouterTest is OdosLimitOrderHelperTest {
   }
 
   /// @dev Reverts if not owner
-  function test_transferRouterFunds_revertsIfNotOwner() public {
+  function test_transferRouterFunds_revertsIfNotLiquidatorOrOwner() public {
     address[] memory tokens = new address[](1);
     uint256[] memory amounts = new uint256[](1);
     tokens[0] = DAI;
@@ -361,7 +361,7 @@ contract OdosLimitOrderRouterTest is OdosLimitOrderHelperTest {
     // mint tokens to router
     MockERC20(tokens[0]).faucet(address(ROUTER), amounts[0]);
 
-    vm.expectRevert("Ownable: caller is not the owner");
+    vm.expectRevert(abi.encodeWithSelector(AddressNotAllowed.selector, SIGNER_ADDRESS));
     vm.prank(SIGNER_ADDRESS);
     ROUTER.transferRouterFunds(tokens, amounts, dest);
   }
