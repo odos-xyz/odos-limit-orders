@@ -101,6 +101,54 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
     assertTrue(ROUTER.limitOrders(SIGNER_ADDRESS, orderHash) == order.input.tokenAmount);
   }
 
+  function test_orderType_emitted() public {
+    // construct order with default test parameters
+    OdosLimitOrderRouter.LimitOrder memory order = createDefaultLimitOrder();
+
+    // sign order
+    SignatureValidator.Signature memory signature = getOrderSignature(order);
+
+    // get default executor context, executor output amount is equal to order output amount
+    OdosLimitOrderRouter.LimitOrderContext memory context = getDefaultContext(order.output.tokenAmount);
+
+    uint256 expectedOrderType = 1234567890;
+    context.orderType = expectedOrderType;
+
+    // mint input token
+    mintToken(order.input.tokenAddress, order.input.tokenAmount);
+
+    // whitelist this address
+    ROUTER.addAllowedFiller(address(this));
+
+    uint256 usdcBalanceBefore = IERC20(USDC).balanceOf(SIGNER_ADDRESS);
+
+    bytes32 orderHash = ROUTER.getLimitOrderHash(order);
+
+    // check that event is emitted, check all topics
+    vm.expectEmit(true, true, true, true);
+    emit LimitOrderFilled(
+      orderHash,
+      SIGNER_ADDRESS,
+      DAI,
+      USDC,
+      2001 * 1e18,
+      2001 * 1e6,
+      2001 * 1e18,
+      2001 * 1e6,
+      0,
+      0,
+      expectedOrderType
+    );
+
+    // run test
+    ROUTER.fillLimitOrder(order, signature, context);
+
+    uint256 usdcBalanceDiff = IERC20(USDC).balanceOf(SIGNER_ADDRESS) - usdcBalanceBefore;
+    assertTrue(usdcBalanceDiff == 2001 * 1e6);
+
+    assertTrue(ROUTER.limitOrders(SIGNER_ADDRESS, orderHash) == order.input.tokenAmount);
+  }
+
 // 1. Check msg.sender allowed
   function test_msgSenderCheck_reverts() public {
     // construct order with default test parameters

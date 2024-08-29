@@ -133,6 +133,58 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
     assertTrue(IERC20(order.outputs[1].tokenAddress).balanceOf(SIGNER_ADDRESS) - balancesBefore[1] == amountOut2);
   }
 
+
+  function test_multi_orderType_emitted() public {
+    // create order
+    OdosLimitOrderRouter.MultiLimitOrder memory order = createDefaultMultiLimitOrder();
+
+    uint256 amountOut1 = 2002 * 1e6;
+    uint256 amountOut2 = 1998 * 1e18;
+
+    // get order signature
+    SignatureValidator.Signature memory signature = getMultiOrderSignature(order);
+
+    // create execution context
+    OdosLimitOrderRouter.MultiLimitOrderContext memory context = getDefaultMultiContext(amountOut1, amountOut2);
+
+    uint256 expectedOrderType = 1234567890;
+    context.orderType = expectedOrderType;
+
+    // mint input tokens
+    mintTokens(SIGNER_ADDRESS);
+    // add to whitelist
+    ROUTER.addAllowedFiller(address(this));
+
+    uint256[] memory balancesBefore = new uint256[](2);
+    for(uint256 i = 0; i < order.outputs.length; i++) {
+      balancesBefore[i] = IERC20(order.outputs[i].tokenAddress).balanceOf(SIGNER_ADDRESS);
+    }
+
+    MultiLimitOrderHelper memory helper = getOrderHelper(order);
+
+    // check that event is emitted, check all topics
+    vm.expectEmit(true, true, true, true);
+    emit MultiLimitOrderFilled(
+      ROUTER.getMultiLimitOrderHash(order),
+      SIGNER_ADDRESS,
+      helper.inputTokens,
+      helper.outputTokens,
+      helper.orderInputAmounts,
+      helper.orderOutputAmounts,
+      context.currentAmounts,
+      helper.filledOutputAmounts,
+      helper.surplus,
+      0,
+      expectedOrderType
+    );
+
+    // run test
+    ROUTER.fillMultiLimitOrder(order, signature, context);
+
+    assertTrue(IERC20(order.outputs[0].tokenAddress).balanceOf(SIGNER_ADDRESS) - balancesBefore[0] == amountOut1);
+    assertTrue(IERC20(order.outputs[1].tokenAddress).balanceOf(SIGNER_ADDRESS) - balancesBefore[1] == amountOut2);
+  }
+
 // 1. Check msg.sender allowed
   function test_multi_msgSenderCheck_reverts() public {
     // create order
