@@ -28,7 +28,8 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
     uint256 filledInputAmount,
     uint256 filledOutputAmount,
     uint256 surplus,
-    uint32 referralCode
+    uint32 referralCode,
+    uint256 orderType
   );
 
   event LimitOrderCancelled(
@@ -86,6 +87,7 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
       2001 * 1e6,
       2001 * 1e18,
       2001 * 1e6,
+      0,
       0,
       0
     );
@@ -253,6 +255,7 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
       2001 * 1e18,
       2001 * 1e6,
       0,
+      0,
       0
     );
     // run test
@@ -380,6 +383,7 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
       2001 * 1e18,
       2001 * 1e6,
       4 * 1e6,
+      0,
       0
     );
 
@@ -431,6 +435,7 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
       2001 * 1e6,
       1000 * 1e18,
       1000 * 1e6,
+      0,
       0,
       0
     );
@@ -517,6 +522,7 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
       2001 * 1e6,
       1000 * 1e18,
       1000 * 1e6,
+      0,
       0,
       0
     );
@@ -647,6 +653,7 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
       2001 * 1e18,
       2001 * 1e6,
       0,
+      0,
       0
     );
 
@@ -692,6 +699,7 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
       2001 * 1e6,
       2001 * 1e18,
       2001 * 1e6,
+      0,
       0,
       0
     );
@@ -786,6 +794,7 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
       2001 * 1e18,
       2001 * 1e6,
       0,
+      0,
       0
     );
 
@@ -877,7 +886,8 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
       2001 * 1e18,
       2001 * 1e6,
       swapAmountOut - swapAmountOut * REFERRAL_FEE / FEE_DENOM - order.output.tokenAmount,
-      REFERRAL_CODE_FEE
+      REFERRAL_CODE_FEE,
+      0
     );
 
     // run test
@@ -955,7 +965,8 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
       2001 * 1e18,
       2001 * 1e6,
       0,
-      REFERRAL_CODE_TRACK
+      REFERRAL_CODE_TRACK,
+      0
     );
 
     // run test

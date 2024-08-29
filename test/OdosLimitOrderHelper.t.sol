@@ -139,7 +139,8 @@ contract OdosLimitOrderHelperTest is Test, EIP712("OdosLimitOrders", "1"), IERC2
       odosExecutor: address(ODOS_EXECUTOR),
       currentAmount: 2001 * 1e18,
       inputReceiver: address(ROUTER),
-      minSurplus: 0
+      minSurplus: 0,
+      orderType: 0
     });
   }
 
@@ -270,7 +271,8 @@ contract OdosLimitOrderHelperTest is Test, EIP712("OdosLimitOrders", "1"), IERC2
       odosExecutor: address(ODOS_EXECUTOR),
       currentAmounts: currentAmounts,
       inputReceivers: inputReceivers,
-      minSurplus: minSurplus
+      minSurplus: minSurplus,
+      orderType: 0
     });
   }
   function getDefaultOneToManyContext(
@@ -305,7 +307,8 @@ contract OdosLimitOrderHelperTest is Test, EIP712("OdosLimitOrders", "1"), IERC2
       odosExecutor: address(ODOS_EXECUTOR),
       currentAmounts: currentAmounts,
       inputReceivers: inputReceivers,
-      minSurplus: minSurplus
+      minSurplus: minSurplus,
+      orderType: 0
     });
   }
   function getDefaultManyToOneContext(
@@ -339,7 +342,8 @@ contract OdosLimitOrderHelperTest is Test, EIP712("OdosLimitOrders", "1"), IERC2
       odosExecutor: address(ODOS_EXECUTOR),
       currentAmounts: currentAmounts,
       inputReceivers: inputReceivers,
-      minSurplus: minSurplus
+      minSurplus: minSurplus,
+      orderType: 0
     });
   }
 

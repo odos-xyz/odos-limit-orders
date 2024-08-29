@@ -27,7 +27,8 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
     uint256[] filledInputAmounts,
     uint256[] filledOutputAmounts,
     uint256[] surplus,
-    uint32 referralCode
+    uint32 referralCode,
+    uint256 orderType
   );
 
   event MultiLimitOrderCancelled(
@@ -47,7 +48,7 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
   ///@notice returns a standard event output fields
   function getOrderHelper(OdosLimitOrderRouter.MultiLimitOrder memory order)
   public
-  view
+  pure
   returns(MultiLimitOrderHelper memory helper) {
     helper = MultiLimitOrderHelper({
       inputTokens: new address[](order.inputs.length),
@@ -121,6 +122,7 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
       context.currentAmounts,
       helper.filledOutputAmounts,
       helper.surplus,
+      0,
       0
     );
 
@@ -299,6 +301,7 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
       context.currentAmounts,
       helper.filledOutputAmounts,
       helper.surplus,
+      0,
       0
     );
 
@@ -438,6 +441,7 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
       context.currentAmounts,
       helper.filledOutputAmounts,
       helper.surplus,
+      0,
       0
     );
 
@@ -497,6 +501,7 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
       context.currentAmounts,
       helper.filledOutputAmounts,
       helper.surplus,
+      0,
       0
     );
 
@@ -603,6 +608,7 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
       context.currentAmounts,
       helper.filledOutputAmounts,
       helper.surplus,
+      0,
       0
     );
 
@@ -764,6 +770,7 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
       context.currentAmounts,
       helper.filledOutputAmounts,
       helper.surplus,
+      0,
       0
     );
 
@@ -829,6 +836,7 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
       context.currentAmounts,
       helper.filledOutputAmounts,
       helper.surplus,
+      0,
       0
     );
 
@@ -890,6 +898,7 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
       context.currentAmounts,
       helper.filledOutputAmounts,
       helper.surplus,
+      0,
       0
     );
 
@@ -946,6 +955,7 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
       context.currentAmounts,
       helper.filledOutputAmounts,
       helper.surplus,
+      0,
       0
     );
 
@@ -1015,6 +1025,7 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
       context.currentAmounts,
       helper.filledOutputAmounts,
       helper.surplus,
+      0,
       0
     );
 
@@ -1077,7 +1088,8 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
       context.currentAmounts,
       helper.filledOutputAmounts,
       helper.surplus,
-      REFERRAL_CODE_FEE
+      REFERRAL_CODE_FEE,
+      0
     );
 
     // run test
@@ -1161,7 +1173,8 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
       context.currentAmounts,
       helper.filledOutputAmounts,
       helper.surplus,
-      REFERRAL_CODE_TRACK
+      REFERRAL_CODE_TRACK,
+      0
     );
 
     // run test
