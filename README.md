@@ -30,10 +30,11 @@ This product allows users to place orders that will be executed at a specified l
 
 | Chain | Limit Order Router Address |
 | :-: | :-: |
-| <img src="https://assets.odos.xyz/chains/optimism.png" width="50" height="50"><br>Optimism | [`0xDA381f498Ae67cBA020D0cD00d89bC7B0829e700`](https://optimistic.etherscan.io/address/0xda381f498ae67cba020d0cd00d89bc7b0829e700) |
-| <img src="https://assets.odos.xyz/chains/base.png" width="50" height="50"><br>Base | [`0xb1949c1E89Ea487C378D85d76C07d3D113AA4EF2`](https://basescan.org/address/0xb1949c1e89ea487c378d85d76c07d3d113aa4ef2) |
-| <img src="https://assets.odos.xyz/chains/mode.png" width="50" height="50"><br>Mode | [`0xcAaf61d47b9D3eCb1765B10F085E542CE0EecCEf`](https://explorer.mode.network/address/0xcAaf61d47b9D3eCb1765B10F085E542CE0EecCEf) |
-| <img src="https://assets.odos.xyz/chains/arbitrum.png" width="50" height="50"><br>Arbitrum | [`0x09cF9441285CE79B4896F5a533d2C2eeB4D368Eb`](https://arbiscan.io/address/0x09cF9441285CE79B4896F5a533d2C2eeB4D368Eb) |
+| <img src="https://assets.odos.xyz/chains/optimism.png" width="50" height="50"><br>Optimism | [`0xafF142fBc8FA5B1885FE54E4C889985F8a579b24`](https://optimistic.etherscan.io/address/0xafF142fBc8FA5B1885FE54E4C889985F8a579b24) |
+| <img src="https://assets.odos.xyz/chains/mantle.png" width="50" height="50"><br>Mantle | [`0x51Ea3db8b67462b0A66b3F1fF50cA87C076Acc7a`](https://mantlescan.xyz/address/0x51Ea3db8b67462b0A66b3F1fF50cA87C076Acc7a) |
+| <img src="https://assets.odos.xyz/chains/base.png" width="50" height="50"><br>Base | [`0x8c8c3E8465B911186aDeC83a53C7De8c587eDDaB`](https://basescan.org/address/0x8c8c3E8465B911186aDeC83a53C7De8c587eDDaB) |
+| <img src="https://assets.odos.xyz/chains/mode.png" width="50" height="50"><br>Mode | [`0x65005f4Bea4005D48eE9Bdaae960832c6CECC557`](https://explorer.mode.network/address/0x65005f4Bea4005D48eE9Bdaae960832c6CECC557) |
+| <img src="https://assets.odos.xyz/chains/arbitrum.png" width="50" height="50"><br>Arbitrum | [`0x83564b903c0311877accEE8f99e6BEb712AD8E43`](https://arbiscan.io/address/0x83564b903c0311877accEE8f99e6BEb712AD8E43) |
 
 ## Smart Contracts
 
