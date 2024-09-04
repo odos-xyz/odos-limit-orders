@@ -57,7 +57,8 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
     uint256 filledInputAmount,   // filled by this execution
     uint256 filledOutputAmount,  // filled by this execution
     uint256 surplus,
-    uint32 referralCode
+    uint32 referralCode,
+    uint256 orderType
   );
 
   /// @dev Event emitted on successful multi input limit order execution
@@ -71,7 +72,8 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
     uint256[] filledInputAmounts,   // filled by this execution
     uint256[] filledOutputAmounts,  // filled by this execution
     uint256[] surplus,
-    uint32 referralCode
+    uint32 referralCode,
+    uint256 orderType
   );
 
   /// @dev Event emitted on single input limit order cancellation
@@ -140,6 +142,7 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
     uint256 currentAmount;
     address inputReceiver;
     uint256 minSurplus;
+    uint256 orderType;
   }
 
   /// @dev The execution context provided by the filler for multi token limit order
@@ -149,6 +152,7 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
     uint256[] currentAmounts;
     address[] inputReceivers;
     uint256[] minSurplus;
+    uint256 orderType;
   }
 
   /// @dev A helper which is used for avoiding "Stack too deep" error with single input order
@@ -818,7 +822,8 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
       context.currentAmount,
       helper.proratedAmount,
       helper.surplus,
-      order.referralCode
+      order.referralCode,
+      context.orderType
     );
   }
 
@@ -997,7 +1002,8 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
       context.currentAmounts,
       helper.filledOutputAmounts,
       helper.surplus,
-      order.referralCode
+      order.referralCode,
+      context.orderType
     );
   }
 

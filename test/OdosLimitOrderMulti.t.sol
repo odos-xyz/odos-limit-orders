@@ -27,7 +27,8 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
     uint256[] filledInputAmounts,
     uint256[] filledOutputAmounts,
     uint256[] surplus,
-    uint32 referralCode
+    uint32 referralCode,
+    uint256 orderType
   );
 
   event MultiLimitOrderCancelled(
@@ -47,7 +48,7 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
   ///@notice returns a standard event output fields
   function getOrderHelper(OdosLimitOrderRouter.MultiLimitOrder memory order)
   public
-  view
+  pure
   returns(MultiLimitOrderHelper memory helper) {
     helper = MultiLimitOrderHelper({
       inputTokens: new address[](order.inputs.length),
@@ -121,7 +122,60 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
       context.currentAmounts,
       helper.filledOutputAmounts,
       helper.surplus,
+      0,
       0
+    );
+
+    // run test
+    ROUTER.fillMultiLimitOrder(order, signature, context);
+
+    assertTrue(IERC20(order.outputs[0].tokenAddress).balanceOf(SIGNER_ADDRESS) - balancesBefore[0] == amountOut1);
+    assertTrue(IERC20(order.outputs[1].tokenAddress).balanceOf(SIGNER_ADDRESS) - balancesBefore[1] == amountOut2);
+  }
+
+
+  function test_multi_orderType_emitted() public {
+    // create order
+    OdosLimitOrderRouter.MultiLimitOrder memory order = createDefaultMultiLimitOrder();
+
+    uint256 amountOut1 = 2002 * 1e6;
+    uint256 amountOut2 = 1998 * 1e18;
+
+    // get order signature
+    SignatureValidator.Signature memory signature = getMultiOrderSignature(order);
+
+    // create execution context
+    OdosLimitOrderRouter.MultiLimitOrderContext memory context = getDefaultMultiContext(amountOut1, amountOut2);
+
+    uint256 expectedOrderType = 1234567890;
+    context.orderType = expectedOrderType;
+
+    // mint input tokens
+    mintTokens(SIGNER_ADDRESS);
+    // add to whitelist
+    ROUTER.addAllowedFiller(address(this));
+
+    uint256[] memory balancesBefore = new uint256[](2);
+    for(uint256 i = 0; i < order.outputs.length; i++) {
+      balancesBefore[i] = IERC20(order.outputs[i].tokenAddress).balanceOf(SIGNER_ADDRESS);
+    }
+
+    MultiLimitOrderHelper memory helper = getOrderHelper(order);
+
+    // check that event is emitted, check all topics
+    vm.expectEmit(true, true, true, true);
+    emit MultiLimitOrderFilled(
+      ROUTER.getMultiLimitOrderHash(order),
+      SIGNER_ADDRESS,
+      helper.inputTokens,
+      helper.outputTokens,
+      helper.orderInputAmounts,
+      helper.orderOutputAmounts,
+      context.currentAmounts,
+      helper.filledOutputAmounts,
+      helper.surplus,
+      0,
+      expectedOrderType
     );
 
     // run test
@@ -299,6 +353,7 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
       context.currentAmounts,
       helper.filledOutputAmounts,
       helper.surplus,
+      0,
       0
     );
 
@@ -438,6 +493,7 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
       context.currentAmounts,
       helper.filledOutputAmounts,
       helper.surplus,
+      0,
       0
     );
 
@@ -497,6 +553,7 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
       context.currentAmounts,
       helper.filledOutputAmounts,
       helper.surplus,
+      0,
       0
     );
 
@@ -603,6 +660,7 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
       context.currentAmounts,
       helper.filledOutputAmounts,
       helper.surplus,
+      0,
       0
     );
 
@@ -764,6 +822,7 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
       context.currentAmounts,
       helper.filledOutputAmounts,
       helper.surplus,
+      0,
       0
     );
 
@@ -829,6 +888,7 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
       context.currentAmounts,
       helper.filledOutputAmounts,
       helper.surplus,
+      0,
       0
     );
 
@@ -890,6 +950,7 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
       context.currentAmounts,
       helper.filledOutputAmounts,
       helper.surplus,
+      0,
       0
     );
 
@@ -946,6 +1007,7 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
       context.currentAmounts,
       helper.filledOutputAmounts,
       helper.surplus,
+      0,
       0
     );
 
@@ -1015,6 +1077,7 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
       context.currentAmounts,
       helper.filledOutputAmounts,
       helper.surplus,
+      0,
       0
     );
 
@@ -1077,7 +1140,8 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
       context.currentAmounts,
       helper.filledOutputAmounts,
       helper.surplus,
-      REFERRAL_CODE_FEE
+      REFERRAL_CODE_FEE,
+      0
     );
 
     // run test
@@ -1161,7 +1225,8 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
       context.currentAmounts,
       helper.filledOutputAmounts,
       helper.surplus,
-      REFERRAL_CODE_TRACK
+      REFERRAL_CODE_TRACK,
+      0
     );
 
     // run test
