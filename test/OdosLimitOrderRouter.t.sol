@@ -380,10 +380,6 @@ contract OdosLimitOrderRouterTest is OdosLimitOrderHelperTest {
   }
 
   function test_zero_address_reverts() public {
-    // test invalid constructor address
-    vm.expectRevert(abi.encodeWithSelector(InvalidAddress.selector, address(0)));
-    new OdosLimitOrderRouter(address(0));
-
     address[] memory tokens = new address[](1);
     uint256[] memory amounts = new uint256[](1);
     tokens[0] = DAI;

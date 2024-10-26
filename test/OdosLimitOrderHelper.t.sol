@@ -27,7 +27,6 @@ contract OdosLimitOrderHelperTest is Test, EIP712("OdosLimitOrders", "1"), IERC2
 
   MockOdosExecutor immutable ODOS_EXECUTOR;
   ISignatureTransfer immutable PERMIT2;
-  IOdosRouterV2 immutable ODOS_ROUTER_V2;
   OdosLimitOrderRouter immutable ROUTER;
 
   address constant _ETH = address(0);
@@ -55,15 +54,10 @@ contract OdosLimitOrderHelperTest is Test, EIP712("OdosLimitOrders", "1"), IERC2
   constructor() {
     ODOS_EXECUTOR = new MockOdosExecutor();
     PERMIT2 = new MockPermit2();
-    ODOS_ROUTER_V2 = new MockOdosRouterV2();
-    ROUTER = new OdosLimitOrderRouter(address(ODOS_ROUTER_V2));
+    ROUTER = new OdosLimitOrderRouter();
   }
 
-
-  function setUp() virtual public {
-    ODOS_ROUTER_V2.registerReferralCode(REFERRAL_CODE_FEE, REFERRAL_FEE, REFERRAL_BENEFICIARY_ADDRESS_FEE);
-    ODOS_ROUTER_V2.registerReferralCode(REFERRAL_CODE_TRACK, 0, REFERRAL_BENEFICIARY_ADDRESS_TRACK);
-  }
+  function setUp() virtual public { }
 
   /// Creates a limit order with default parameters which can be overridden if necessary before signing the order
   function getLimitOrderWitnessTypeHash()
@@ -114,6 +108,8 @@ contract OdosLimitOrderHelperTest is Test, EIP712("OdosLimitOrders", "1"), IERC2
       salt: 1,
       expiry: block.timestamp + 86400,
       referralCode: 0,
+      referralFee: 0,
+      referralFeeRecipient: address(0),
       partiallyFillable: false
     });
   }
@@ -187,6 +183,8 @@ contract OdosLimitOrderHelperTest is Test, EIP712("OdosLimitOrders", "1"), IERC2
       salt: 1,
       expiry: block.timestamp + 86400,
       referralCode: 0,
+      referralFee: 0,
+      referralFeeRecipient: address(0),
       partiallyFillable: false
     });
   }
@@ -210,6 +208,8 @@ contract OdosLimitOrderHelperTest is Test, EIP712("OdosLimitOrders", "1"), IERC2
       salt: 1,
       expiry: block.timestamp + 86400,
       referralCode: 0,
+      referralFee: 0,
+      referralFeeRecipient: address(0),
       partiallyFillable: false
     });
   }
@@ -233,6 +233,8 @@ contract OdosLimitOrderHelperTest is Test, EIP712("OdosLimitOrders", "1"), IERC2
       salt: 1,
       expiry: block.timestamp + 86400,
       referralCode: 0,
+      referralFee: 0,
+      referralFeeRecipient: address(0),
       partiallyFillable: false
     });
   }
