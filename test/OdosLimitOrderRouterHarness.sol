@@ -7,8 +7,8 @@ import {OdosLimitOrderRouter} from "../contracts/OdosLimitOrderRouter.sol";
 /// @dev This contract is required for exposing the internal function getOrderOwnerOrRevert for tests
 contract OdosLimitOrderRouterHarness is OdosLimitOrderRouter {
 
-  constructor(address _odosRouterV2)
-  OdosLimitOrderRouter(_odosRouterV2) {}
+  constructor()
+  OdosLimitOrderRouter() {}
 
   function exposed_getOrderOwnerOrRevert(
     bytes32 orderHash,
