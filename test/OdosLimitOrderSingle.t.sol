@@ -219,10 +219,35 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
     mintToken(order.input.tokenAddress, order.input.tokenAmount);
 
     // DO NOT add to whitelist
-    //ROUTER.addToWhitelist(address(this));
+    // ROUTER.addAllowedFiller(address(this));
 
     // run test, revert expected
     vm.expectRevert(abi.encodeWithSelector(AddressNotAllowed.selector, address(this)));
+    ROUTER.fillLimitOrder(order, signature, context);
+  }
+
+  function test_feeToHigh_reverts() public {
+    // construct order with default test parameters
+    OdosLimitOrderRouter.LimitOrder memory order = createDefaultLimitOrder();
+
+    order.referralCode = 1;
+    order.referralFee = 1e18 / 50 + 1;
+    order.referralFeeRecipient = address(this);
+
+    // sign order
+    SignatureValidator.Signature memory signature = getOrderSignature(order);
+
+    // get default executor context, executor output amount is equal to order output amount
+    OdosLimitOrderRouter.LimitOrderContext memory context = getDefaultContext(order.output.tokenAmount);
+
+    // mint input token
+    mintToken(order.input.tokenAddress, order.input.tokenAmount);
+
+    // whitelist this address
+    ROUTER.addAllowedFiller(address(this));
+
+    // run test, revert expected
+    vm.expectRevert(abi.encodeWithSelector(InvalidReferralFee.selector, order.referralFee));
     ROUTER.fillLimitOrder(order, signature, context);
   }
 

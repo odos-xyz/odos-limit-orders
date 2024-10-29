@@ -273,6 +273,34 @@ contract OdosLimitOrderMultiTest is OdosLimitOrderHelperTest {
     ROUTER.fillMultiLimitOrder(order, signature, context);
   }
 
+  function test_feeTooHigh_reverts() public {
+    // create order
+    OdosLimitOrderRouter.MultiLimitOrder memory order = createDefaultMultiLimitOrder();
+
+    order.referralCode = 1;
+    order.referralFee = 1e18 / 50 + 1;
+    order.referralFeeRecipient = address(this);
+
+    uint256 amountOut1 = 2002 * 1e6;
+    uint256 amountOut2 = 1998 * 1e18;
+
+    // get order signature
+    SignatureValidator.Signature memory signature = getMultiOrderSignature(order);
+
+    // create execution context
+    OdosLimitOrderRouter.MultiLimitOrderContext memory context = getDefaultMultiContext(amountOut1, amountOut2);
+
+    // mint input tokens
+    mintTokens(SIGNER_ADDRESS);
+
+    // add to whitelist
+    ROUTER.addAllowedFiller(address(this));
+
+    // run test, revert expected
+    vm.expectRevert(abi.encodeWithSelector(InvalidReferralFee.selector, order.referralFee));
+    ROUTER.fillMultiLimitOrder(order, signature, context);
+  }
+
 // 2. Check if order still valid
   function test_multi_orderExpiry_reverts() public {
     // create order

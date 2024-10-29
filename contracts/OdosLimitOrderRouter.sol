@@ -25,6 +25,7 @@ error InvalidArguments();
 error MinSurplusCheckFailed(address tokenAddress, uint256 expectedValue, uint256 actualValue);
 error InvalidAddress(address _address);
 error FunctionIsDisabled();
+error InvalidReferralFee(uint64 referralFee);
 
 
 /// @title Routing contract for Odos Limit Orders with single and multi input and output tokens
@@ -793,7 +794,9 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
       if (order.referralFeeRecipient == address(0)) {
         revert InvalidAddress(order.referralFeeRecipient);
       }
-
+      if (order.referralFee > FEE_DENOM / 50) {
+        revert InvalidReferralFee(order.referralFee);
+      }
       if (order.referralFeeRecipient != address(this)) {
         _universalTransfer(
           order.output.tokenAddress,
@@ -972,6 +975,9 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
         if (order.referralFee > 0) {
           if (order.referralFeeRecipient == address(0)) {
             revert InvalidAddress(order.referralFeeRecipient);
+          }
+          if (order.referralFee > FEE_DENOM / 50) {
+            revert InvalidReferralFee(order.referralFee);
           }
           if (order.referralFeeRecipient != address(this)) {
             _universalTransfer(
