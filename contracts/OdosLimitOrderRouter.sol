@@ -25,6 +25,7 @@ error InvalidArguments();
 error MinSurplusCheckFailed(address tokenAddress, uint256 expectedValue, uint256 actualValue);
 error InvalidAddress(address _address);
 error FunctionIsDisabled();
+error InvalidReferralFee(uint64 referralFee);
 
 
 /// @title Routing contract for Odos Limit Orders with single and multi input and output tokens
@@ -37,11 +38,7 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
   address private constant _ETH = address(0);
 
   /// @dev Constants for managing referrals and fees
-  uint256 private constant REFERRAL_WITH_FEE_THRESHOLD = 1 << 31;
   uint256 private constant FEE_DENOM = 1e18;
-
-  /// @dev OdosRouterV2 address
-  address immutable private ODOS_ROUTER_V2;
 
   /// @dev Address which allowed to call `swapRouterFunds()` besides the owner
   address public liquidatorAddress;
@@ -52,12 +49,12 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
     address indexed orderOwner,
     address inputToken,
     address outputToken,
-    uint256 orderInputAmount,
-    uint256 orderOutputAmount,
-    uint256 filledInputAmount,   // filled by this execution
-    uint256 filledOutputAmount,  // filled by this execution
+    uint256 filledInputAmount,
+    uint256 filledOutputAmount,
     uint256 surplus,
-    uint32 referralCode,
+    uint64 referralCode,
+    uint64 referralFee,
+    address referralFeeRecipient,
     uint256 orderType
   );
 
@@ -67,12 +64,12 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
     address indexed orderOwner,
     address[] inputTokens,
     address[] outputTokens,
-    uint256[] orderInputAmounts,
-    uint256[] orderOutputAmounts,
-    uint256[] filledInputAmounts,   // filled by this execution
-    uint256[] filledOutputAmounts,  // filled by this execution
+    uint256[] filledInputAmounts,
+    uint256[] filledOutputAmounts,
     uint256[] surplus,
-    uint32 referralCode,
+    uint64 referralCode,
+    uint64 referralFee,
+    address referralFeeRecipient,
     uint256 orderType
   );
 
@@ -121,7 +118,9 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
     TokenInfo output;
     uint256 expiry;
     uint256 salt;
-    uint32 referralCode;
+    uint64 referralCode;
+    uint64 referralFee;
+    address referralFeeRecipient;
     bool partiallyFillable;
   }
 
@@ -131,7 +130,9 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
     TokenInfo[] outputs;
     uint256 expiry;
     uint256 salt;
-    uint32 referralCode;
+    uint64 referralCode;
+    uint64 referralFee;
+    address referralFeeRecipient;
     bool partiallyFillable;
   }
 
@@ -255,14 +256,9 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
     TOKEN_INFO_TYPE_STRING
   ));
 
-  /// @param _odosRouterV2 OdosRouterV2 address
-  constructor(address _odosRouterV2)
-  EIP712("OdosLimitOrderRouter", "1")
+  constructor()
+    EIP712("OdosLimitOrderRouter", "1")
   {
-    if (_odosRouterV2 == address(0)) {
-      revert InvalidAddress(_odosRouterV2);
-    }
-    ODOS_ROUTER_V2 = _odosRouterV2;
     changeLiquidatorAddress(msg.sender);
   }
 
@@ -626,6 +622,8 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
         order.expiry,
         order.salt,
         order.referralCode,
+        order.referralFee,
+        order.referralFeeRecipient,
         order.partiallyFillable
       )
     );
@@ -658,6 +656,8 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
         order.expiry,
         order.salt,
         order.referralCode,
+        order.referralFee,
+        order.referralFeeRecipient,
         order.partiallyFillable
       )
     );
@@ -774,7 +774,7 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
     LimitOrderHelper memory helper;
 
     // 10. Get output token balances before
-    helper.balanceBefore = IERC20(order.output.tokenAddress).balanceOf(address(this));
+    helper.balanceBefore = _universalBalance(order.output.tokenAddress);
 
     // 11. Call Odos Executor
     {
@@ -784,17 +784,27 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
     }
 
     // 12. Get output token balances difference
-    helper.amountOut = IERC20(order.output.tokenAddress).balanceOf(address(this)) - helper.balanceBefore;
+    helper.amountOut = _universalBalance(order.output.tokenAddress) - helper.balanceBefore;
 
     // calculate prorated output amount in case of partial fill, otherwise it will be equal to order.output.tokenAmount
     helper.proratedAmount = SCALE * order.output.tokenAmount * context.currentAmount / order.input.tokenAmount / SCALE;
 
     // 13. Calculate and transfer referral fee if any
-    if (order.referralCode > REFERRAL_WITH_FEE_THRESHOLD) {
-      IOdosRouterV2.referralInfo memory ri = IOdosRouterV2(ODOS_ROUTER_V2).referralLookup(order.referralCode);
-      uint256 beneficiaryAmount = helper.amountOut * ri.referralFee * 8 / (FEE_DENOM * 10);
-      helper.amountOut = helper.amountOut * (FEE_DENOM - ri.referralFee) / FEE_DENOM;
-      IERC20(order.output.tokenAddress).safeTransfer(ri.beneficiary, beneficiaryAmount);
+    if (order.referralFee > 0) {
+      if (order.referralFeeRecipient == address(0)) {
+        revert InvalidAddress(order.referralFeeRecipient);
+      }
+      if (order.referralFee > FEE_DENOM / 50) {
+        revert InvalidReferralFee(order.referralFee);
+      }
+      if (order.referralFeeRecipient != address(this)) {
+        _universalTransfer(
+          order.output.tokenAddress,
+          order.referralFeeRecipient,
+          helper.amountOut * order.referralFee * 8 / (FEE_DENOM * 10)
+        );
+      }
+      helper.amountOut = helper.amountOut * (FEE_DENOM - order.referralFee) / FEE_DENOM;
     }
 
     // 14. Check slippage, adjust amountOut
@@ -809,7 +819,11 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
     }
 
     // 16. Transfer tokens to the order owner
-    IERC20(order.output.tokenAddress).safeTransfer(orderOwner, helper.proratedAmount);
+    _universalTransfer(
+      order.output.tokenAddress,
+      orderOwner, 
+      helper.proratedAmount
+    );
 
     // 17. Emit LimitOrderFilled event
     emit LimitOrderFilled(
@@ -817,12 +831,12 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
       orderOwner,
       order.input.tokenAddress,
       order.output.tokenAddress,
-      order.input.tokenAmount,
-      order.output.tokenAmount,
       context.currentAmount,
       helper.proratedAmount,
       helper.surplus,
       order.referralCode,
+      order.referralFee,
+      order.referralFeeRecipient,
       context.orderType
     );
   }
@@ -945,7 +959,7 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
     for (uint256 i = 0; i < order.outputs.length; i++) {
       helper.outputTokens[i] = order.outputs[i].tokenAddress;
       helper.orderOutputAmounts[i] = order.outputs[i].tokenAmount;
-      helper.balancesBefore[i] = IERC20(order.outputs[i].tokenAddress).balanceOf(address(this));
+      helper.balancesBefore[i] = _universalBalance(order.outputs[i].tokenAddress);
     }
     // 11. Call Odos Executor
     IOdosExecutor(context.odosExecutor).executePath(context.pathDefinition, context.currentAmounts, msg.sender);
@@ -954,23 +968,26 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
       // 12. Get output token balances difference
       uint256[] memory amountsOut = new uint256[](order.outputs.length);
       for (uint256 i = 0; i < order.outputs.length; i++) {
-        amountsOut[i] = IERC20(order.outputs[i].tokenAddress).balanceOf(address(this)) - helper.balancesBefore[i];
+        amountsOut[i] = _universalBalance(order.outputs[i].tokenAddress) - helper.balancesBefore[i];
       }
-
-
-      IOdosRouterV2.referralInfo memory ri;
-      if (order.referralCode > REFERRAL_WITH_FEE_THRESHOLD) {
-        ri = IOdosRouterV2(ODOS_ROUTER_V2).referralLookup(order.referralCode);
-      }
-
       for (uint256 i = 0; i < order.outputs.length; i++) {
         // 13. Calculate and transfer referral fee if any
-        if (order.referralCode > REFERRAL_WITH_FEE_THRESHOLD) {
-          uint256 beneficiaryAmount = amountsOut[i] * ri.referralFee * 8 / (FEE_DENOM * 10);
-          amountsOut[i] = amountsOut[i] * (FEE_DENOM - ri.referralFee) / FEE_DENOM;
-          IERC20(order.outputs[i].tokenAddress).safeTransfer(ri.beneficiary, beneficiaryAmount);
+        if (order.referralFee > 0) {
+          if (order.referralFeeRecipient == address(0)) {
+            revert InvalidAddress(order.referralFeeRecipient);
+          }
+          if (order.referralFee > FEE_DENOM / 50) {
+            revert InvalidReferralFee(order.referralFee);
+          }
+          if (order.referralFeeRecipient != address(this)) {
+            _universalTransfer(
+              order.outputs[i].tokenAddress,
+              order.referralFeeRecipient,
+              amountsOut[i] * order.referralFee * 8 / (FEE_DENOM * 10)
+            );
+          }
+          amountsOut[i] = amountsOut[i] * (FEE_DENOM - order.referralFee) / FEE_DENOM;
         }
-
         // calculate prorated output amount in case of partial fill, otherwise it will be equal to order.output.tokenAmount
         uint256 proratedAmount = helper.amountProration * order.outputs[i].tokenAmount / SCALE;
 
@@ -987,24 +1004,52 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
         }
 
         // 16. Transfer tokens to the order owner
-        IERC20(order.outputs[i].tokenAddress).safeTransfer(helper.orderOwner, proratedAmount);
+        _universalTransfer(
+          order.outputs[i].tokenAddress,
+          helper.orderOwner,
+          proratedAmount
+        );
       }
     }
-
     // 17. Emit LimitOrderFilled event
     emit MultiLimitOrderFilled(
       helper.orderHash,
       helper.orderOwner,
       helper.inputTokens,
       helper.outputTokens,
-      helper.orderInputAmounts,
-      helper.orderOutputAmounts,
       context.currentAmounts,
       helper.filledOutputAmounts,
       helper.surplus,
       order.referralCode,
+      order.referralFee,
+      order.referralFeeRecipient,
       context.orderType
     );
   }
 
+  /// @notice helper function to get balance of ERC20 or native coin for this contract
+  /// @param token address of the token to check, null for native coin
+  /// @return balance of specified coin or token
+  function _universalBalance(address token) private view returns(uint256) {
+    if (token == _ETH) {
+      return address(this).balance;
+    } else {
+      return IERC20(token).balanceOf(address(this));
+    }
+  }
+
+  /// @notice helper function to transfer ERC20 or native coin
+  /// @param token address of the token being transferred, null for native coin
+  /// @param to address to transfer to
+  /// @param amount to transfer
+  function _universalTransfer(address token, address to, uint256 amount) private {
+    if (token == _ETH) {
+      (bool success,) = payable(to).call{value: amount}("");
+      if (!success) {
+          revert TransferFailed(to, amount);
+        }
+    } else {
+      IERC20(token).safeTransfer(to, amount);
+    }
+  }
 }

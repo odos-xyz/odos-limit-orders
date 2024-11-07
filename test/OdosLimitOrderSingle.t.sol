@@ -23,12 +23,12 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
     address indexed orderOwner,
     address inputToken,
     address outputToken,
-    uint256 orderInputAmount,
-    uint256 orderOutputAmount,
     uint256 filledInputAmount,
     uint256 filledOutputAmount,
     uint256 surplus,
-    uint32 referralCode,
+    uint64 referralCode,
+    uint64 referralFee,
+    address referralFeeRecipient,
     uint256 orderType
   );
 
@@ -85,10 +85,10 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
       USDC,
       2001 * 1e18,
       2001 * 1e6,
-      2001 * 1e18,
-      2001 * 1e6,
       0,
       0,
+      0,
+      address(0),
       0
     );
 
@@ -97,6 +97,61 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
 
     uint256 usdcBalanceDiff = IERC20(USDC).balanceOf(SIGNER_ADDRESS) - usdcBalanceBefore;
     assertTrue(usdcBalanceDiff == 2001 * 1e6);
+
+    assertTrue(ROUTER.limitOrders(SIGNER_ADDRESS, orderHash) == order.input.tokenAmount);
+  }
+
+  function test_eth_output_succeeds() public {
+    // construct order with default test parameters
+    OdosLimitOrderRouter.LimitOrder memory order = createDefaultLimitOrder();
+
+    order.output = OdosLimitOrderRouter.TokenInfo(address(0), 2001 * 1e18);
+
+    // sign order
+    SignatureValidator.Signature memory signature = getOrderSignature(order);
+
+    // get default executor context, executor output amount is equal to order output amount
+    OdosLimitOrderRouter.LimitOrderContext memory context = getDefaultContext(order.output.tokenAmount);
+
+    address[] memory tokensOut = new address[](1);
+    tokensOut[0] = address(0);
+
+    uint256[] memory amountsOut = new uint256[](1);
+    amountsOut[0] = 2001 * 1e18;
+
+    context.pathDefinition = abi.encode(tokensOut, amountsOut);
+
+    // mint input token
+    mintToken(order.input.tokenAddress, order.input.tokenAmount);
+
+    // whitelist this address
+    ROUTER.addAllowedFiller(address(this));
+
+    uint256 balanceBefore = SIGNER_ADDRESS.balance;
+
+    bytes32 orderHash = ROUTER.getLimitOrderHash(order);
+
+    // check that event is emitted, check all topics
+    vm.expectEmit(true, true, true, true);
+    emit LimitOrderFilled(
+      orderHash,
+      SIGNER_ADDRESS,
+      DAI,
+      address(0),
+      2001 * 1e18,
+      2001 * 1e18,
+      0,
+      0,
+      0,
+      address(0),
+      0
+    );
+
+    // run test
+    ROUTER.fillLimitOrder(order, signature, context);
+
+    uint256 balanceDiff = SIGNER_ADDRESS.balance - balanceBefore;
+    assertTrue(balanceDiff == 2001 * 1e18);
 
     assertTrue(ROUTER.limitOrders(SIGNER_ADDRESS, orderHash) == order.input.tokenAmount);
   }
@@ -133,10 +188,10 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
       USDC,
       2001 * 1e18,
       2001 * 1e6,
-      2001 * 1e18,
-      2001 * 1e6,
       0,
       0,
+      0,
+      address(0),
       expectedOrderType
     );
 
@@ -164,10 +219,35 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
     mintToken(order.input.tokenAddress, order.input.tokenAmount);
 
     // DO NOT add to whitelist
-    //ROUTER.addToWhitelist(address(this));
+    // ROUTER.addAllowedFiller(address(this));
 
     // run test, revert expected
     vm.expectRevert(abi.encodeWithSelector(AddressNotAllowed.selector, address(this)));
+    ROUTER.fillLimitOrder(order, signature, context);
+  }
+
+  function test_feeToHigh_reverts() public {
+    // construct order with default test parameters
+    OdosLimitOrderRouter.LimitOrder memory order = createDefaultLimitOrder();
+
+    order.referralCode = 1;
+    order.referralFee = 1e18 / 50 + 1;
+    order.referralFeeRecipient = address(this);
+
+    // sign order
+    SignatureValidator.Signature memory signature = getOrderSignature(order);
+
+    // get default executor context, executor output amount is equal to order output amount
+    OdosLimitOrderRouter.LimitOrderContext memory context = getDefaultContext(order.output.tokenAmount);
+
+    // mint input token
+    mintToken(order.input.tokenAddress, order.input.tokenAmount);
+
+    // whitelist this address
+    ROUTER.addAllowedFiller(address(this));
+
+    // run test, revert expected
+    vm.expectRevert(abi.encodeWithSelector(InvalidReferralFee.selector, order.referralFee));
     ROUTER.fillLimitOrder(order, signature, context);
   }
 
@@ -300,10 +380,10 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
       USDC,
       2001 * 1e18,
       2001 * 1e6,
-      2001 * 1e18,
-      2001 * 1e6,
       0,
       0,
+      0,
+      address(0),
       0
     );
     // run test
@@ -428,10 +508,10 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
       USDC,
       2001 * 1e18,
       2001 * 1e6,
-      2001 * 1e18,
-      2001 * 1e6,
       4 * 1e6,
       0,
+      0,
+      address(0),
       0
     );
 
@@ -479,12 +559,12 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
       SIGNER_ADDRESS,
       DAI,
       USDC,
-      2001 * 1e18,
-      2001 * 1e6,
       1000 * 1e18,
       1000 * 1e6,
       0,
       0,
+      0,
+      address(0),
       0
     );
 
@@ -566,12 +646,12 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
       SIGNER_ADDRESS,
       DAI,
       USDC,
-      2001 * 1e18,
-      2001 * 1e6,
       1000 * 1e18,
       1000 * 1e6,
       0,
       0,
+      0,
+      address(0),
       0
     );
     // run test
@@ -698,10 +778,10 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
       USDC,
       2001 * 1e18,
       2001 * 1e6,
-      2001 * 1e18,
-      2001 * 1e6,
       0,
       0,
+      0,
+      address(0),
       0
     );
 
@@ -745,10 +825,10 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
       USDC,
       2001 * 1e18,
       2001 * 1e6,
-      2001 * 1e18,
-      2001 * 1e6,
       0,
       0,
+      0,
+      address(0),
       0
     );
 
@@ -839,10 +919,10 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
       USDC,
       2001 * 1e18,
       2001 * 1e6,
-      2001 * 1e18,
-      2001 * 1e6,
       0,
       0,
+      0,
+      address(0),
       0
     );
 
@@ -899,6 +979,8 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
 
     // set the referral code with fee
     order.referralCode = REFERRAL_CODE_FEE;
+    order.referralFee = REFERRAL_FEE;
+    order.referralFeeRecipient = REFERRAL_BENEFICIARY_ADDRESS_FEE;
 
     // set amount out which takes into account beneficiary fee
     uint256 swapAmountOut = 2004 * 1e6;
@@ -931,10 +1013,10 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
       USDC,
       2001 * 1e18,
       2001 * 1e6,
-      2001 * 1e18,
-      2001 * 1e6,
       swapAmountOut - swapAmountOut * REFERRAL_FEE / FEE_DENOM - order.output.tokenAmount,
       REFERRAL_CODE_FEE,
+      REFERRAL_FEE,
+      REFERRAL_BENEFICIARY_ADDRESS_FEE,
       0
     );
 
@@ -956,6 +1038,8 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
 
     // set the referral code with fee
     order.referralCode = REFERRAL_CODE_FEE;
+    order.referralFee = REFERRAL_FEE;
+    order.referralFeeRecipient = REFERRAL_BENEFICIARY_ADDRESS_FEE;
 
     // set amount out which is smaller than required for execution with fee
     uint256 swapAmountOut = 2002 * 1e6;
@@ -984,6 +1068,7 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
 
     // set the referral code with track only
     order.referralCode = REFERRAL_CODE_TRACK;
+    order.referralFeeRecipient = REFERRAL_BENEFICIARY_ADDRESS_TRACK;
 
     // sign order
     SignatureValidator.Signature memory signature = getOrderSignature(order);
@@ -1010,10 +1095,10 @@ contract OdosLimitOrderSingleTest is OdosLimitOrderHelperTest {
       USDC,
       2001 * 1e18,
       2001 * 1e6,
-      2001 * 1e18,
-      2001 * 1e6,
       0,
       REFERRAL_CODE_TRACK,
+      0,
+      REFERRAL_BENEFICIARY_ADDRESS_TRACK,
       0
     );
 
