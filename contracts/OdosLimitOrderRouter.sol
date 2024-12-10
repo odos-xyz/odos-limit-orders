@@ -8,7 +8,6 @@ import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 
 import {IOdosExecutor} from  "../interfaces/IOdosExecutor.sol";
 import {ISignatureTransfer} from "../interfaces/ISignatureTransfer.sol";
-import {IOdosRouterV2} from  "../interfaces/IOdosRouterV2.sol";
 import {SignatureValidator} from "./SignatureValidator.sol";
 
 
