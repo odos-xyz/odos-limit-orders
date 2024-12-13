@@ -214,7 +214,9 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
       "TokenInfo output,"
       "uint256 expiry,"
       "uint256 salt,"
-      "uint32 referralCode,"
+      "uint64 referralCode,"
+      "uint64 referralFee,"
+      "address referralFeeRecipient,"
       "bool partiallyFillable"
     ")";
 
@@ -224,7 +226,9 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
       "TokenInfo[] outputs,"
       "uint256 expiry,"
       "uint256 salt,"
-      "uint32 referralCode,"
+      "uint64 referralCode,"
+      "uint64 referralFee,"
+      "address referralFeeRecipient,"
       "bool partiallyFillable"
     ")";
 
