@@ -26,7 +26,26 @@ This product allows users to place orders that will be executed at a specified l
 16. Transfer tokens to order owner account
 17. Emit LimitOrderFilled (MultiLimitOrderFilled) event
 
-## Deployment Addresses
+## V2 Deployment Addresses
+
+| Chain | Limit Order Router Address |
+| :-: | :-: |
+| <img src="https://assets.odos.xyz/chains/ethereum.png" width="50" height="50"><br>Ethereum | [`0x2Bd1E23a2Cd5c52334501B6a1F188009290D84a5`](https://etherscan.io/address/0x2Bd1E23a2Cd5c52334501B6a1F188009290D84a5) |
+| <img src="https://assets.odos.xyz/chains/optimism.png" width="50" height="50"><br>Optimism | [`0x08F161354c15CF0F2fF2039dC6b85A1B42AaF48b`](https://optimistic.etherscan.io/address/0x08F161354c15CF0F2fF2039dC6b85A1B42AaF48b) |
+| <img src="https://assets.odos.xyz/chains/bnb.png" width="50" height="50"><br>BNB | [`0x41a42adA966Cbfa5BD71225F32E44FEA66b285ac`](https://bscscan.com/address/0x41a42adA966Cbfa5BD71225F32E44FEA66b285ac) |
+| <img src="https://assets.odos.xyz/chains/polygon.png" width="50" height="50"><br>Polygon | [`0xf3f8C59cb5343eEaaE205FDE5C90B6Ce476494d7`](https://polygonscan.com/address/0xf3f8C59cb5343eEaaE205FDE5C90B6Ce476494d7) |
+| <img src="https://assets.odos.xyz/chains/fantom.png" width="50" height="50"><br>Fantom | [`0x0857dE010f6583a88A0114de1611392F85f84527`](https://ftmscan.com/address/0x0857dE010f6583a88A0114de1611392F85f84527) |
+| <img src="https://assets.odos.xyz/chains/fraxtal.png" width="50" height="50"><br>Fraxtal | [`0xf78b2432F77aEa2A3e35263E017fFcC20EB5F075`](https://fraxscan.com/address/0xf78b2432F77aEa2A3e35263E017fFcC20EB5F075) |
+| <img src="https://assets.odos.xyz/chains/zksync.png" width="50" height="50"><br>zkSync Era | [`0x6a45535b8480eD943a85916e5f3b4F75c95D9fd3`](https://era.zksync.network/address/0x6a45535b8480eD943a85916e5f3b4F75c95D9fd3) |
+| <img src="https://assets.odos.xyz/chains/mantle.png" width="50" height="50"><br>Mantle | [`0x327327bAaf17688cB8F1501023b5482dca2851Bb`](https://mantlescan.xyz/address/0x327327bAaf17688cB8F1501023b5482dca2851Bb) |
+| <img src="https://assets.odos.xyz/chains/base.png" width="50" height="50"><br>Base | [`0x7091202dAa037CDC9F157DB82653f4d90E6FaaD4`](https://basescan.org/address/0x7091202dAa037CDC9F157DB82653f4d90E6FaaD4) |
+| <img src="https://assets.odos.xyz/chains/mode.png" width="50" height="50"><br>Mode | [`0x0f95b0ec022216150637102AbF1503cEb69fCDAd`](https://explorer.mode.network/address/0x0f95b0ec022216150637102AbF1503cEb69fCDAd) |
+| <img src="https://assets.odos.xyz/chains/arbitrum.png" width="50" height="50"><br>Arbitrum | [`0x71a40B9104043c04C808389d89dC932406459a09`](https://arbiscan.io/address/0x71a40B9104043c04C808389d89dC932406459a09) |
+| <img src="https://assets.odos.xyz/chains/avalanche.png" width="50" height="50"><br>Avalanche | [`0x95077184FFB22964a9375cF435b82358d6DC0289`](https://snowscan.xyz/address/0x95077184FFB22964a9375cF435b82358d6DC0289) |
+| <img src="https://assets.odos.xyz/chains/linea.png" width="50" height="50"><br>Linea | [`0x9Ed9Df32aBDE10341026631487Fa8cB20Ab69c86`](https://lineascan.build/address/0x9Ed9Df32aBDE10341026631487Fa8cB20Ab69c86) |
+| <img src="https://assets.odos.xyz/chains/scroll.png" width="50" height="50"><br>Scroll | [`0xc94840Dff7Fa56E56BA0a9fbc49013BC5291fE91`](https://scrollscan.com/address/0xc94840Dff7Fa56E56BA0a9fbc49013BC5291fE91) |
+
+## V1 Deployment Addresses
 
 | Chain | Limit Order Router Address |
 | :-: | :-: |
