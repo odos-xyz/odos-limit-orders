@@ -30,10 +30,12 @@ contract MockOdosExecutor is IOdosExecutor, Test {
     // mint tokens
     for (uint256 i = 0; i < outputAddresses.length; i++) {
       if (outputAddresses[i] == address(0)) {
-        vm.deal(msg.sender, outputAmounts[i]);
+        vm.deal(address(this), outputAmounts[i]);
+        payable(msg.sender).transfer(outputAmounts[i]);
       }
       else {
-        MockERC20(outputAddresses[i]).faucet(msg.sender, outputAmounts[i]);
+        MockERC20(outputAddresses[i]).faucet(address(this), outputAmounts[i]);
+        IERC20(outputAddresses[i]).transfer(msg.sender, outputAmounts[i]);
       } 
     }
   }
