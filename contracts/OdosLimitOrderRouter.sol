@@ -265,6 +265,8 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
     changeLiquidatorAddress(msg.sender);
   }
 
+  // Must exist in order for contract to receive eth
+  receive() external payable { }
 
   /// @notice Tries to execute a single input limit order, expects the input token to be approved via the ERC20 interface
   /// @param order Single input limit order struct
