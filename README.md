@@ -10,7 +10,7 @@ This product allows users to place orders that will be executed at a specified l
 2. Check if order still valid
 3. Check tokens, amounts
 4. Get order hash
-5. Recover order owner account [and validate the signature]
+5. Recover order owner account (and validate the signature)
 6. Extract previously filled amounts for order from storage, or create
 7. Check if fill possible:
   - If partiallyFillable, total amount do not exceed
