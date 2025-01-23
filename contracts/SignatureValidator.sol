@@ -2,14 +2,14 @@
 pragma solidity 0.8.19;
 
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import {UniversalSigValidator} from "./UniversalSigValidator.sol";
+import {SignatureChecker} from "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 
-error InvalidEip1271Signature(bytes32 orderHash, address account, bytes signature);
+error InvalidEip1271Signature(address account, bytes32 orderHash, bytes signature);
 error OrderNotPresigned(bytes32 orderHash, address account);
 error InvalidPresignLength(uint256 expectedLength, uint256 actualLength);
 
 /// @notice Limit order signature validator
-contract SignatureValidator is UniversalSigValidator {
+contract SignatureValidator {
 
   /// @dev Storage for keeping pre-signed orders
   mapping(address account => mapping(bytes32 orderHash => bool preSigned)) public preSignedOrders;
@@ -64,8 +64,8 @@ contract SignatureValidator is UniversalSigValidator {
       // and the remaining part of the bytes array contains the signature.
       bytes calldata signature = encodedSignature[20:];
 
-      if (!isValidSig(account, orderHash, signature)) {
-        revert InvalidEip1271Signature(orderHash, account, signature);
+      if (!SignatureChecker.isValidERC1271SignatureNow(account, orderHash, signature)) {
+        revert InvalidEip1271Signature(account, orderHash, signature);
       }
     } else { // validationMethod == SignatureValidationMethod.PreSign
       if (encodedSignature.length != 20) {
