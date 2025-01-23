@@ -716,6 +716,37 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
     }
   }
 
+  /// @dev Handle a referral fee
+  /// @param originalAmountOut output amount before function
+  /// @param outputToken output token in question
+  /// @param referralFee the referral fee to charge
+  /// @param referralFeeRecipient recipient of the referral fee
+  /// @return newAmountOut the amount out after the referral fee
+  function _handleFee(
+      uint256 originalAmountOut,
+      address outputToken,
+      uint64 referralFee,
+      address referralFeeRecipient
+  )
+    internal
+    returns (uint256 newAmountOut) 
+  {
+    if (referralFeeRecipient == address(0)) {
+      revert InvalidAddress(referralFeeRecipient);
+    }
+    if (referralFee > FEE_DENOM / 50) {
+      revert InvalidReferralFee(referralFee);
+    }
+    if (referralFeeRecipient != address(this)) {
+      _universalTransfer(
+        outputToken,
+        referralFeeRecipient,
+        originalAmountOut * referralFee * 8 / (FEE_DENOM * 10)
+      );
+    }
+    newAmountOut = originalAmountOut * (FEE_DENOM - referralFee) / FEE_DENOM;
+  }
+
   /// @dev Limit order checks
   /// @param order Single input limit order struct
   /// @param context Order execution context
@@ -796,20 +827,12 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
 
     // 13. Calculate and transfer referral fee if any
     if (order.referralFee > 0) {
-      if (order.referralFeeRecipient == address(0)) {
-        revert InvalidAddress(order.referralFeeRecipient);
-      }
-      if (order.referralFee > FEE_DENOM / 50) {
-        revert InvalidReferralFee(order.referralFee);
-      }
-      if (order.referralFeeRecipient != address(this)) {
-        _universalTransfer(
+      helper.amountOut = _handleFee(
+          helper.amountOut,
           order.output.tokenAddress,
-          order.referralFeeRecipient,
-          helper.amountOut * order.referralFee * 8 / (FEE_DENOM * 10)
-        );
-      }
-      helper.amountOut = helper.amountOut * (FEE_DENOM - order.referralFee) / FEE_DENOM;
+          order.referralFee,
+          order.referralFeeRecipient
+      );
     }
 
     // 14. Check slippage, adjust amountOut
@@ -978,20 +1001,13 @@ contract OdosLimitOrderRouter is EIP712, Ownable2Step, SignatureValidator {
       for (uint256 i = 0; i < order.outputs.length; i++) {
         // 13. Calculate and transfer referral fee if any
         if (order.referralFee > 0) {
-          if (order.referralFeeRecipient == address(0)) {
-            revert InvalidAddress(order.referralFeeRecipient);
-          }
-          if (order.referralFee > FEE_DENOM / 50) {
-            revert InvalidReferralFee(order.referralFee);
-          }
-          if (order.referralFeeRecipient != address(this)) {
-            _universalTransfer(
-              order.outputs[i].tokenAddress,
-              order.referralFeeRecipient,
-              amountsOut[i] * order.referralFee * 8 / (FEE_DENOM * 10)
-            );
-          }
-          amountsOut[i] = amountsOut[i] * (FEE_DENOM - order.referralFee) / FEE_DENOM;
+
+          amountsOut[i] = _handleFee(
+            amountsOut[i],
+            order.outputs[i].tokenAddress,
+            order.referralFee,
+            order.referralFeeRecipient
+          );
         }
         // calculate prorated output amount in case of partial fill, otherwise it will be equal to order.output.tokenAmount
         uint256 proratedAmount = helper.amountProration * order.outputs[i].tokenAmount / SCALE;

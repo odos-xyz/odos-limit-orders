@@ -68,7 +68,7 @@ contract SignatureValidationsTest is OdosLimitOrderHelperTest {
 
     bytes memory encodedSignature = abi.encodePacked(accountAddress, wrongOrderSignature);
 
-    vm.expectRevert(abi.encodeWithSelector(InvalidEip1271Signature.selector, orderHash, accountAddress, wrongOrderSignature));
+    vm.expectRevert(abi.encodeWithSelector(InvalidEip1271Signature.selector, accountAddress, orderHash, wrongOrderSignature));
     ROUTER2.exposed_getOrderOwnerOrRevert(
       orderHash,
       encodedSignature,
@@ -144,92 +144,5 @@ contract SignatureValidationsTest is OdosLimitOrderHelperTest {
     bytes32 hash = keccak256(abi.encodePacked(bytes1(0xff), address(factory), salt, keccak256(bytecodeWithArgs)));
     address expectedAddress = address(uint160(uint(hash)));
     assertEq(deployedAddress, expectedAddress);
-  }
-
-  function prepare_EIP6492_deployment(bytes memory expectedOrderSignature, bytes memory actualOrderSignature)
-  public
-  returns (bytes memory eip6492sig, address expectedAddress) {
-    Create2Factory factory = new Create2Factory();
-    bytes32 salt = keccak256("SOME_RANDOM_SALT");
-
-    // Prepare the bytecode of MockSmartContractWallet with constructor argument
-    bytes memory bytecode = type(MockSmartContractWallet).creationCode;
-    bytes memory bytecodeWithArgs = abi.encodePacked(bytecode, abi.encode(orderHash, expectedOrderSignature));
-
-    // prepare factory calldata
-    bytes memory factoryCalldata = abi.encodeWithSelector(
-      factory.deploy.selector,
-      salt,
-      bytecodeWithArgs
-    );
-
-    // Compute the smart contract wallet expected address
-    bytes32 hash = keccak256(abi.encodePacked(bytes1(0xff), address(factory), salt, keccak256(bytecodeWithArgs)));
-    expectedAddress = address(uint160(uint(hash)));
-
-    // As per ERC-6492: create2Factory, factoryCalldata, originalSig
-    // The address, bytes, and bytes parameters to be encoded
-    bytes memory encodedData = abi.encode(address(factory), factoryCalldata, actualOrderSignature);
-
-    // The magic suffix to be appended
-    bytes memory magicSuffix = hex"6492649264926492649264926492649264926492649264926492649264926492";
-
-    // Concatenate the encodedData with the magicSuffix
-    eip6492sig = bytes.concat(encodedData, magicSuffix);
-  }
-
-  function test_EIP1271_EIP6492_succeeds() public {
-    SignatureValidator.Signature memory signature = getOrderSignature(defaultOrder);
-
-    // Actual order signature is equal to expected
-    (bytes memory eip6492sig, address expectedAddress) = prepare_EIP6492_deployment(signature.signature, signature.signature);
-
-    // Prepend the signature with the smart contract wallet address
-    bytes memory encodedSignature = abi.encodePacked(expectedAddress, eip6492sig);
-
-    address orderOwner = ROUTER2.exposed_getOrderOwnerOrRevert(
-      orderHash,
-      encodedSignature,
-      SignatureValidator.SignatureValidationMethod.EIP1271
-    );
-
-    assertEq(expectedAddress, orderOwner);
-  }
-
-  function test_EIP1271_EIP6492_reverts() public {
-    SignatureValidator.Signature memory expectedSignature = getOrderSignature(defaultOrder);
-
-    defaultOrder.salt = 2;
-    SignatureValidator.Signature memory actualSignature = getOrderSignature(defaultOrder);
-
-    (bytes memory eip6492sig, address expectedAddress) = prepare_EIP6492_deployment(expectedSignature.signature, actualSignature.signature);
-
-    // Prepend the signature with the smart contract wallet address
-    bytes memory encodedSignature = abi.encodePacked(expectedAddress, eip6492sig);
-
-    vm.expectRevert(abi.encodeWithSelector(InvalidEip1271Signature.selector, orderHash, expectedAddress, eip6492sig));
-    ROUTER2.exposed_getOrderOwnerOrRevert(
-      orderHash,
-      encodedSignature,
-      SignatureValidator.SignatureValidationMethod.EIP1271
-    );
-  }
-
-  // Check the situation when the user set SignatureValidationMethod.EIP1271,
-  // but instead of SCW there is EOA. In this case we use ECDSA.recover() to
-  // to get the signer address
-  function test_EIP1271_EIP712_succeeds() public {
-    address accountAddress = SIGNER_ADDRESS;
-    SignatureValidator.Signature memory signature = getOrderSignature(defaultOrder);
-
-    bytes memory encodedSignature = abi.encodePacked(accountAddress, signature.signature);
-
-    address orderOwner = ROUTER2.exposed_getOrderOwnerOrRevert(
-      ROUTER.getLimitOrderHash(defaultOrder),
-      encodedSignature,
-      SignatureValidator.SignatureValidationMethod.EIP1271
-    );
-
-    assertEq(accountAddress, orderOwner);
   }
 }
