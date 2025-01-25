@@ -30,21 +30,21 @@ This product allows users to place orders that will be executed at a specified l
 
 | Chain | Limit Order Router Address |
 | :-: | :-: |
-| <img src="https://assets.odos.xyz/chains/ethereum.png" width="50" height="50"><br>Ethereum | [`0xC6A5e5b46ea58D2DAdb150c7A53BEC8E7d3326A6`](https://etherscan.io/address/0xC6A5e5b46ea58D2DAdb150c7A53BEC8E7d3326A6) |
-| <img src="https://assets.odos.xyz/chains/optimism.png" width="50" height="50"><br>Optimism | [`0x8525E1A0494877aF744E33C5982e9dfBe417B2F8`](https://optimistic.etherscan.io/address/0x8525E1A0494877aF744E33C5982e9dfBe417B2F8) |
-| <img src="https://assets.odos.xyz/chains/bnb.png" width="50" height="50"><br>BNB | [`0x5b8A43645A73f8D82f09722A6CA3b65B0Fb092d5`](https://bscscan.com/address/0x5b8A43645A73f8D82f09722A6CA3b65B0Fb092d5) |
-| <img src="https://assets.odos.xyz/chains/polygon.png" width="50" height="50"><br>Polygon | [`0xb182Bdd72F0D32C1b0cd191B87530bB1e0e04E28`](https://polygonscan.com/address/0xb182Bdd72F0D32C1b0cd191B87530bB1e0e04E28) |
-| <img src="https://assets.odos.xyz/chains/sonic.png" width="50" height="50"><br>Sonic | [`0x64815baaF1230e84416f58D29608a538c52f072e`](https://sonicscan.org/address/0x64815baaF1230e84416f58D29608a538c52f072e) |
-| <img src="https://assets.odos.xyz/chains/fantom.png" width="50" height="50"><br>Fantom | [`0x965eb9798c1cC5431c84CA5bCA4b8dae71074C84`](https://ftmscan.com/address/0x965eb9798c1cC5431c84CA5bCA4b8dae71074C84) |
-| <img src="https://assets.odos.xyz/chains/fraxtal.png" width="50" height="50"><br>Fraxtal | [`0x168C5348f8f945E14dAaA3077EE397c8B4431F44`](https://fraxscan.com/address/0x168C5348f8f945E14dAaA3077EE397c8B4431F44) |
-| <img src="https://assets.odos.xyz/chains/zksync.png" width="50" height="50"><br>zkSync Era | [`0x713BFe68dCb8586D1C2741e7E2a1f2aE5F06159b`](https://era.zksync.network/address/0x713BFe68dCb8586D1C2741e7E2a1f2aE5F06159b) |
-| <img src="https://assets.odos.xyz/chains/mantle.png" width="50" height="50"><br>Mantle | [`0xAd2a6508D1f42f5Da43BACF3EA2972aCA609cbD6`](https://mantlescan.xyz/address/0xAd2a6508D1f42f5Da43BACF3EA2972aCA609cbD6) |
-| <img src="https://assets.odos.xyz/chains/base.png" width="50" height="50"><br>Base | [`0xB6333E994Fd02a9255E794C177EfBDEB1FE779C7`](https://basescan.org/address/0xB6333E994Fd02a9255E794C177EfBDEB1FE779C7) |
-| <img src="https://assets.odos.xyz/chains/mode.png" width="50" height="50"><br>Mode | [`0x3574b916A92102F221Ba270Ea06B39EF174c0E50`](https://explorer.mode.network/address/0x3574b916A92102F221Ba270Ea06B39EF174c0E50) |
-| <img src="https://assets.odos.xyz/chains/arbitrum.png" width="50" height="50"><br>Arbitrum | [`0x5e4EC180fA2BaBE43a97E40354fad873D4f2A05F`](https://arbiscan.io/address/0x5e4EC180fA2BaBE43a97E40354fad873D4f2A05F) |
-| <img src="https://assets.odos.xyz/chains/avalanche.png" width="50" height="50"><br>Avalanche | [`0xfBb60699757967fa695766E1DdbbC345bFC1f030`](https://snowscan.xyz/address/0xfBb60699757967fa695766E1DdbbC345bFC1f030) |
-| <img src="https://assets.odos.xyz/chains/linea.png" width="50" height="50"><br>Linea | [`0x1A616e15f16100fc6C98949d0cCbb76f6F841Ffc`](https://lineascan.build/address/0x1A616e15f16100fc6C98949d0cCbb76f6F841Ffc) |
-| <img src="https://assets.odos.xyz/chains/scroll.png" width="50" height="50"><br>Scroll | [`0x27783F3f5B533564412FcfEfB50Ff7aff286B566`](https://scrollscan.com/address/0x27783F3f5B533564412FcfEfB50Ff7aff286B566) |
+| <img src="https://assets.odos.xyz/chains/ethereum.png" width="50" height="50"><br>Ethereum | [`0x5F79636fa7bc622eA48802E6cf80A5dae814daE1`](https://etherscan.io/address/0x5F79636fa7bc622eA48802E6cf80A5dae814daE1) |
+| <img src="https://assets.odos.xyz/chains/optimism.png" width="50" height="50"><br>Optimism | [`0xcbF3822A63B7867cD602317fB4aE3ca864826ef8`](https://optimistic.etherscan.io/address/0xcbF3822A63B7867cD602317fB4aE3ca864826ef8) |
+| <img src="https://assets.odos.xyz/chains/bnb.png" width="50" height="50"><br>BNB | [`0x0D4aB12E62D17f037D43F018Da18FF623e1AF3B2`](https://bscscan.com/address/0x0D4aB12E62D17f037D43F018Da18FF623e1AF3B2) |
+| <img src="https://assets.odos.xyz/chains/polygon.png" width="50" height="50"><br>Polygon | [`0x93052961c75c92Fd5d6362655936C239EF2D5336`](https://polygonscan.com/address/0x93052961c75c92Fd5d6362655936C239EF2D5336) |
+| <img src="https://assets.odos.xyz/chains/sonic.png" width="50" height="50"><br>Sonic | [`0xB9CBD870916e9Ffc52076Caa714f85a022B7f330`](https://sonicscan.org/address/0xB9CBD870916e9Ffc52076Caa714f85a022B7f330) |
+| <img src="https://assets.odos.xyz/chains/fantom.png" width="50" height="50"><br>Fantom | [`0x5E0aFaD0f658f9689806296e0509AfFC191d9a09`](https://ftmscan.com/address/0x5E0aFaD0f658f9689806296e0509AfFC191d9a09) |
+| <img src="https://assets.odos.xyz/chains/fraxtal.png" width="50" height="50"><br>Fraxtal | [`0x5E0aFaD0f658f9689806296e0509AfFC191d9a09`](https://fraxscan.com/address/0x5E0aFaD0f658f9689806296e0509AfFC191d9a09) |
+| <img src="https://assets.odos.xyz/chains/zksync.png" width="50" height="50"><br>zkSync Era | [`0x74ab8c1247aE3C5FFFD9F85781F31751bdd98E73`](https://era.zksync.network/address/0x74ab8c1247aE3C5FFFD9F85781F31751bdd98E73) |
+| <img src="https://assets.odos.xyz/chains/mantle.png" width="50" height="50"><br>Mantle | [`0xa05A88037402d869b7CA69F5bEc098E19BeDaFbB`](https://mantlescan.xyz/address/0xa05A88037402d869b7CA69F5bEc098E19BeDaFbB) |
+| <img src="https://assets.odos.xyz/chains/base.png" width="50" height="50"><br>Base | [`0xeDeAfdEf0901eF74Ee28c207BE8424D3B353D97A`](https://basescan.org/address/0xeDeAfdEf0901eF74Ee28c207BE8424D3B353D97A) |
+| <img src="https://assets.odos.xyz/chains/mode.png" width="50" height="50"><br>Mode | [`0x8073e286DaDc6d92BefC8f436c5BcDFcE213e681`](https://explorer.mode.network/address/0x8073e286DaDc6d92BefC8f436c5BcDFcE213e681) |
+| <img src="https://assets.odos.xyz/chains/arbitrum.png" width="50" height="50"><br>Arbitrum | [`0x7432657cDda02226ac2aAc9d8f552Ee9613B064e`](https://arbiscan.io/address/0x7432657cDda02226ac2aAc9d8f552Ee9613B064e) |
+| <img src="https://assets.odos.xyz/chains/avalanche.png" width="50" height="50"><br>Avalanche | [`0xcc0126349d1bD892D1C53381E68dBF0c8F0E045e`](https://snowscan.xyz/address/0xcc0126349d1bD892D1C53381E68dBF0c8F0E045e) |
+| <img src="https://assets.odos.xyz/chains/linea.png" width="50" height="50"><br>Linea | [`0xb3a9B56056a5c93F468dF62579b9A5BEa1741069`](https://lineascan.build/address/0xb3a9B56056a5c93F468dF62579b9A5BEa1741069) |
+| <img src="https://assets.odos.xyz/chains/scroll.png" width="50" height="50"><br>Scroll | [`0x468633515c46EfFCC77Caa949ce8775505e5deDA`](https://scrollscan.com/address/0x468633515c46EfFCC77Caa949ce8775505e5deDA) |
 
 ## V1 Deployment Addresses
 
